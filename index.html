@@ -48,8 +48,8 @@ body {
 }
 
 #character-face img {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
 }
 
 /* 캐릭터 스탯 */
@@ -108,7 +108,6 @@ body {
   padding: 10px;
   background: #223354;
   border-radius: 10px;
-  position: relative;
 }
 
 #items-label {
@@ -117,9 +116,14 @@ body {
   margin-bottom: 10px;
 }
 
+/* 아이템 슬롯 - 정사각형 유지 */
 .item-slot {
   width: 100px;
   height: 100px;
+  min-width: 100px;
+  min-height: 100px;
+  max-width: 100px;
+  max-height: 100px;
   background: #334466;
   border-radius: 15px;
 }
@@ -243,7 +247,8 @@ let isBGMPlaying = false;
 
 // 플레이어 / 몬스터 정보
 let player = { hp: 300, maxHp: 350, attack: 100, defense: 50 };
-let monster = { hp: 200, maxHp: 200 };
+let monsterTemplate = { maxHp: 200, attack: 20 }; // 몬스터 기본 정보
+let monster = { hp: monsterTemplate.maxHp };
 
 // 캐릭터/NPC 이미지
 const characters = {
@@ -306,13 +311,15 @@ bgmToggle.onclick = () => {
 function updateStats(){
   document.getElementById("player-hp").innerText = `체력: ${player.hp} / ${player.maxHp}`;
   const monsterBar = document.getElementById("monster-health-inner");
-  monsterBar.style.width = `${(monster.hp / monster.maxHp) * 100}%`;
+  monsterBar.style.width = `${(monster.hp / monsterTemplate.maxHp) * 100}%`;
 }
 
 // 전투 시작
 function startBattle(){
-  writeMessage("유령이 나타났습니다!", "npc");
+  log.innerHTML = ""; // 이전 텍스트 제거
+  monster.hp = monsterTemplate.maxHp; // 몬스터 체력 초기화
   updateStats();
+  writeMessage("유령이 나타났습니다!", "npc");
   setChoices([
     { text: "공격", action: attack },
     { text: "도망", action: flee }
@@ -321,51 +328,4 @@ function startBattle(){
 
 function attack(){
   let damageToMonster = Math.max(player.attack - 20, 5);
-  monster.hp -= damageToMonster;
-  writeMessage(`몬스터에게 ${damageToMonster}의 피해를 주었습니다!`, "player");
-  if(monster.hp <= 0){
-    monster.hp = 0;
-    updateStats();
-    writeMessage("몬스터를 처치했습니다!", "player");
-    setChoices([{ text: "다음 전투", action: resetBattle }]);
-  } else {
-    monsterTurn();
-  }
-  updateStats();
-}
-
-function monsterTurn(){
-  let damageToPlayer = 15;
-  player.hp -= damageToPlayer;
-  if(player.hp < 0) player.hp = 0;
-  writeMessage(`몬스터가 공격! 플레이어가 ${damageToPlayer} 피해를 입었습니다.`, "npc");
-  updateStats();
-  if(player.hp <= 0){
-    writeMessage("플레이어가 쓰러졌습니다...", "npc");
-    setChoices([]);
-  } else {
-    setChoices([
-      { text: "공격", action: attack },
-      { text: "도망", action: flee }
-    ]);
-  }
-}
-
-function flee(){
-  writeMessage("도망쳤습니다!", "player");
-  setChoices([{ text: "다음 전투", action: resetBattle }]);
-}
-
-function resetBattle(){
-  monster.hp = monster.maxHp;
-  player.hp = player.maxHp;
-  updateStats();
-  startBattle();
-}
-
-// 게임 시작
-startBattle();
-</script>
-
-</body>
-</html>
+  monster.hp -= damage
