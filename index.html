@@ -17,7 +17,7 @@ body {
     position:relative;
 }
 
-/* --- 시작 씬 --- */
+/* 시작 씬 */
 #startScreen {
     position:absolute; top:0; left:0; width:100%; height:100%;
     display:flex; flex-direction:column; justify-content:center; align-items:center;
@@ -39,7 +39,7 @@ body {
     position:absolute; top:15px; right:15px; font-size:28px; cursor:pointer; z-index:1000;
 }
 
-/* --- 게임 씬 --- */
+/* 게임 씬 */
 #gameContainer {
     display:none;
     position:absolute; top:50%; left:50%;
@@ -53,7 +53,6 @@ body {
     gap:10px; padding:10px; box-sizing:border-box;
     transition: opacity 1s;
 }
-
 #zone-display { grid-column:1/4; grid-row:1/2; text-align:center; font-weight:bold; font-size:2rem; }
 
 /* 캐릭터 */
@@ -90,21 +89,19 @@ body {
 #choices button { background:#4a90e2; border:none; border-radius:8px; padding:8px 12px; color:white; cursor:pointer; font-weight:bold; transition:0.2s; }
 #choices button:hover { background:#357ab7; transform:translateY(-2px); }
 
-/* 게임 클리어 팝업 */
-#clearPopup {
+/* 팝업 */
+#popup {
     display:none; position:absolute; top:50%; left:50%;
     transform:translate(-50%,-50%);
-    background: rgba(0,0,0,0.8);
-    border-radius:20px;
-    padding:30px; text-align:center;
-    z-index:20;
+    background: rgba(0,0,0,0.8); border-radius:20px;
+    padding:30px; text-align:center; z-index:20;
 }
-#clearPopup img { width:300px; margin-bottom:20px; }
-#clearPopup button {
-    background:#4a90e2; border:none; border-radius:8px; padding:10px 20px; color:white; cursor:pointer; font-weight:bold;
-    transition:0.2s; font-size:1.1rem;
+#popup img { width:200px; margin-bottom:20px; }
+#popup button {
+    padding:12px 25px; font-size:1rem; border:none; border-radius:10px;
+    cursor:pointer; background:#4a90e2; color:white; font-weight:bold;
 }
-#clearPopup button:hover { background:#357ab7; transform:translateY(-2px); }
+#popup button:hover { background:#357ab7; }
 
 @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
 .glow { animation: glow 0.8s ease infinite; }
@@ -151,11 +148,11 @@ body {
   </div>
 </div>
 
-<!-- 클리어 팝업 -->
-<div id="clearPopup">
-  <img src="images/clear.gif" alt="게임 클리어!">
-  <h2>클리어 하셨습니다! 축하드려요 선생님!</h2>
-  <button id="restartBtn">다시 하기!</button>
+<!-- 팝업 -->
+<div id="popup">
+  <img id="popup-img" src="">
+  <p id="popup-text"></p>
+  <button id="popup-btn">다시 하기</button>
 </div>
 
 <script>
@@ -165,16 +162,17 @@ document.addEventListener("DOMContentLoaded", ()=>{
     const gameContainer = document.getElementById("gameContainer");
     const bgm = document.getElementById("bgm");
     const bgmToggle = document.getElementById("bgm-toggle");
-    let isBGMPlaying = false;
+    const popup = document.getElementById("popup");
+    const popupImg = document.getElementById("popup-img");
+    const popupText = document.getElementById("popup-text");
+    const popupBtn = document.getElementById("popup-btn");
 
+    let isBGMPlaying = false;
     const log = document.getElementById("log");
     const choices = document.getElementById("choices");
     const eventImg = document.getElementById("event-img");
     const monsterHealthDiv = document.getElementById("monster-health");
     const monsterHealthInner = document.getElementById("monster-health-inner");
-
-    const clearPopup = document.getElementById("clearPopup");
-    const restartBtn = document.getElementById("restartBtn");
 
     const characters = { player:"images/player.png", npc:"images/npc.png" };
 
@@ -188,12 +186,12 @@ document.addEventListener("DOMContentLoaded", ()=>{
         2:{monsterHp:300, monsterAtk:30},
         3:{monsterHp:400, monsterAtk:40},
         4:{monsterHp:500, monsterAtk:50},
-        5:{monsterHp:150, monsterAtk:15},
-        6:{monsterHp:250, monsterAtk:25},
-        7:{monsterHp:350, monsterAtk:35},
-        8:{monsterHp:200, monsterAtk:20},
-        9:{monsterHp:450, monsterAtk:45},
-        10:{monsterHp:500, monsterAtk:50}
+        5:{monsterHp:250, monsterAtk:25},
+        6:{monsterHp:350, monsterAtk:35},
+        7:{monsterHp:450, monsterAtk:45},
+        8:{monsterHp:500, monsterAtk:50},
+        9:{monsterHp:600, monsterAtk:60},
+        10:{monsterHp:700, monsterAtk:70}
     };
 
     function writeMessage(text,speaker="npc",imgSrc=null){
@@ -218,7 +216,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
     function updateStats(){
         document.getElementById("player-hp").innerText=`체력: ${player.hp}`;
         monsterHealthInner.style.width = monster.maxHp ? (monster.hp/monster.maxHp*100)+"%" : "0%";
-        document.getElementById("player-attack").innerText = `공격: ${player.attack}`;
     }
 
     function setZoneDisplay(){ document.getElementById("zone-display").innerText=`현재 위치: ${player.zone}구역`; }
@@ -242,15 +239,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
         }
     }
 
-    function nextZone(){
-        player.zone++;
-        if(player.zone>10){
-            showClearPopup();
-            return;
-        }
-        startZoneEvent();
-    }
-
     function startZoneEvent(){
         log.innerHTML=""; setZoneDisplay();
         const event=zoneEvents[player.zone-1];
@@ -269,41 +257,26 @@ document.addEventListener("DOMContentLoaded", ()=>{
         } else if(event.type==="ally"){
             eventImg.src="images/ally.png";
             writeMessage("조우자를 만났습니다! 페로페로~","npc");
-            setChoices([
-                {text:"대화하기", action:()=>{ 
-                    writeMessage("체력이 50 회복되었습니다.","npc");
-                    player.hp=Math.min(player.hp+50,player.maxHp); updateStats();
-                    writeMessage("앗싸!","player");
-                    writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-                    player.hp = Math.max(player.hp-5,0); // 구역 이동 체력 -5
-                    nextZone();
-                }},
-                {text:"그냥 지나가기", action:()=>{
-                    writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-                    player.hp = Math.max(player.hp-5,0); // 체력 -5
-                    nextZone();
-                }}
-            ]);
+            writeMessage("체력 50 회복!","npc");
+            player.hp=Math.min(player.hp+50,player.maxHp); updateStats();
+            setChoices([{text:"앗싸!", action:()=>{
+                writeMessage("앗싸!","player");
+                setChoices([{text:"다음 구역으로 이동", action:nextZone}]);
+            }}]);
         } else if(event.type==="box"){
             eventImg.src="images/box.png";
             eventImg.classList.add("glow");
             writeMessage("상자를 발견했습니다!","npc");
             setChoices([
-                {text:"열기", action:()=>{ 
+                {text:"열기", action:()=>{
                     eventImg.classList.remove("glow");
                     eventImg.src="images/equipment.png";
                     addItemToSlot("images/equipment.png");
                     writeMessage("상자에서 장비 획득! 공격력+20, 체력+20","npc");
                     player.attack+=20; player.maxHp+=20; player.hp+=20; updateStats();
-                    writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-                    player.hp = Math.max(player.hp-5,0); 
-                    nextZone();
+                    setChoices([{text:"다음 구역으로 이동", action:nextZone}]);
                 }},
-                {text:"무시", action:()=>{ 
-                    writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-                    player.hp = Math.max(player.hp-5,0);
-                    nextZone();
-                }}
+                {text:"무시", action:()=>{ setChoices([{text:"다음 구역으로 이동", action:nextZone}]); }}
             ]);
         }
     }
@@ -315,35 +288,48 @@ document.addEventListener("DOMContentLoaded", ()=>{
         writeMessage(`유령에게 ${dmg} 피해를 주었습니다!`,"player");
         updateStats();
         if(monster.hp<=0){
-            writeMessage("유령을 처치했습니다!","npc");
-            writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-            player.hp = Math.max(player.hp-5,0);
-            nextZone();
+            if(player.zone===10){
+                showPopup("clear.gif","모든 구역 클리어! 축하드려요 선생님!");
+            } else {
+                writeMessage("유령을 처치했습니다!","npc");
+                setChoices([{text:"다음 구역으로 이동", action:nextZone}]);
+            }
         } else {
             player.hp-=monster.attack; if(player.hp<0) player.hp=0;
             writeMessage(`유령에게 ${monster.attack} 피해를 받았습니다!`,"npc"); updateStats();
-            if(player.hp<=0){ writeMessage("패배! 1구역으로 이동합니다.","npc"); 
-                player.hp=player.maxHp; player.zone=1; startZoneEvent(); 
-            }
+            if(player.hp<=0){ showPopup("fail.gif","패배해버렸어요 선생님.. 🥺"); }
         }
     }
 
     function flee(){
         writeMessage("도망쳤습니다.","player");
-        player.hp = Math.max(player.hp-5,0);
-        startZoneEvent(); // 같은 구역에서 다른 이벤트 발생
+        player.hp=Math.max(player.hp-5,0); updateStats();
+        if(player.hp<=0){ showPopup("fail.gif","패배해버렸어요 선생님.. 🥺"); }
+        else startZoneEvent(); 
     }
 
-    function showClearPopup(){
-        clearPopup.style.display="block";
+    function nextZone(){
+        player.hp=Math.max(player.hp-5,0);
+        if(player.hp<=0){ showPopup("fail.gif","패배해버렸어요 선생님.. 🥺"); return; }
+        player.zone++;
+        if(player.zone>10){ showPopup("clear.gif","모든 구역 클리어! 축하드려요 선생님!"); return; }
+        startZoneEvent();
     }
 
-    restartBtn.onclick = ()=>{
-        clearPopup.style.display="none";
-        // 클리어 후 초기화: 스탯, 아이템 초기화
+    function showPopup(imgSrc,text){
+        popupImg.src=imgSrc;
+        popupText.innerText=text;
+        popup.style.display="block";
+        gameContainer.style.pointerEvents="none";
+    }
+
+    function resetGame(){
+        popup.style.display="none";
+        gameContainer.style.pointerEvents="auto";
         player = { hp:300, maxHp:350, attack:100, defense:50, zone:1 };
-        updateStats();
+        monster = { hp:0, maxHp:0, attack:0 };
         document.querySelectorAll(".item-slot").forEach(slot=>slot.innerHTML="");
+        updateStats();
         generateRandomEvents();
         startZoneEvent();
     }
@@ -366,6 +352,8 @@ document.addEventListener("DOMContentLoaded", ()=>{
         if(isBGMPlaying){ bgm.pause(); bgmToggle.innerText="🔇"; isBGMPlaying=false; }
         else{ bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true; }
     };
+
+    popupBtn.onclick=resetGame;
 });
 </script>
 </body>
