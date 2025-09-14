@@ -8,41 +8,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap" rel="stylesheet">
 <style>
 body { margin:0; padding:0; font-family:'Do Hyeon', sans-serif; background:#0d1b2a; color:#fff; height:100vh; overflow:hidden; position:relative; }
-
-/* --- 시작 씬 --- */
 #startScreen { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; transition:opacity 1s; background:linear-gradient(135deg,#0d1b2a,#1b263b); z-index:10; }
 #startScreen img { width:250px; margin-bottom:20px; }
 #startScreen h1 { margin:10px 0; font-size:2rem; }
 #startScreen button { padding:15px 30px; font-size:1.2rem; cursor:pointer; border:none; border-radius:10px; background:#4a90e2; color:#fff; transition:0.3s; }
 #startScreen button:hover { background:#357ab7; }
-
-/* BGM toggle */
 #bgm-toggle { position:absolute; top:15px; right:15px; font-size:28px; cursor:pointer; z-index:1000; }
-
-/* --- 게임 씬 --- */
 #gameContainer { display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:1000px; height:650px; background: rgba(20,30,50,0.9); border-radius:20px; display:grid; grid-template-columns:180px 1fr 180px; grid-template-rows:50px 220px 1fr 180px; gap:10px; padding:10px; box-sizing:border-box; transition:opacity 1s; }
-
 #zone-display { grid-column:1/4; grid-row:1/2; text-align:center; font-weight:bold; font-size:2rem; }
-
-/* 캐릭터 */
 #character-face { grid-column:1/2; grid-row:2/3; background:#1b2a41; border-radius:10px; display:flex; justify-content:center; align-items:center; }
 #character-face img { width:120px; height:120px; }
 #character-stats { grid-column:1/2; grid-row:3/4; background:#223354; border-radius:10px; padding:10px; font-size:0.9rem; }
-
-/* 중앙 이벤트 박스 */
 #event-box { grid-column:2/3; grid-row:2/4; position:relative; background-image: url('images/background.png'); background-size:cover; background-position:center; border-radius:10px; display:flex; justify-content:center; align-items:center; flex-direction:column; }
 #event-box img { max-width:80%; max-height:80%; }
-
-/* 몬스터 체력바 */
 #monster-health { width:80%; height:20px; background:#555; border-radius:8px; overflow:hidden; display:none; margin-top:10px; }
 #monster-health-inner { width:100%; height:100%; background:#e74c3c; transition:width 0.3s; }
-
-/* 아이템 */
 #items { grid-column:3/4; grid-row:2/4; display:flex; flex-direction:column; gap:10px; justify-content:flex-start; align-items:center; padding:10px; background:#223354; border-radius:10px; }
 #items-label { font-size:1rem; font-weight:bold; margin-bottom:10px; }
 .item-slot { width:100px; height:100px; background:#334466; border-radius:15px; display:flex; justify-content:center; align-items:center; }
-
-/* 이벤트 로그 */
 #event-log { grid-column:1/4; grid-row:4/5; background:#1b2a41; border-radius:10px; padding:10px; overflow-y:auto; }
 .message { display:flex; align-items:flex-start; gap:10px; margin-bottom:5px; }
 .message img { width:30px; height:30px; border-radius:50%; }
@@ -52,13 +35,10 @@ body { margin:0; padding:0; font-family:'Do Hyeon', sans-serif; background:#0d1b
 #choices { margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; }
 #choices button { background:#4a90e2; border:none; border-radius:8px; padding:8px 12px; color:white; cursor:pointer; font-weight:bold; transition:0.2s; }
 #choices button:hover { background:#357ab7; transform:translateY(-2px); }
-
-/* 팝업 */
 #popup { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background: rgba(0,0,0,0.9); border-radius:20px; display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px; color:#fff; text-align:center; z-index:50; }
 #popup img { max-width:300px; margin-bottom:20px; }
 #popup button { background:#4a90e2; color:#fff; border:none; border-radius:10px; padding:10px 20px; font-size:1rem; cursor:pointer; transition:0.3s; }
 #popup button:hover { transform:translateY(-2px); }
-
 @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
 .glow { animation: glow 0.8s ease infinite; }
 @keyframes glow { 0% {filter: brightness(1);} 50% {filter: brightness(2);} 100% {filter: brightness(1);} }
@@ -66,19 +46,16 @@ body { margin:0; padding:0; font-family:'Do Hyeon', sans-serif; background:#0d1b
 </head>
 <body>
 
-<!-- 시작 씬 -->
 <div id="startScreen">
   <img src="images/game-logo.png" alt="게임 로고">
   <h1>오싹! 위기 일발! 납량체험의 날!</h1>
   <button id="startGameBtn">게임 시작</button>
 </div>
 
-<!-- BGM -->
 <div id="bgm-toggle">🔇</div>
 <audio id="bgm" src="audio/bgm.mp3" loop></audio>
-<audio id="click-sound" src="audio/click.mp3"></audio>
+<audio id="clickSound" src="audio/click.mp3"></audio>
 
-<!-- 게임 씬 -->
 <div id="gameContainer">
   <div id="zone-display">현재 위치: 1구역</div>
   <div id="character-face"><img src="images/player.png" alt="캐릭터"></div>
@@ -105,7 +82,6 @@ body { margin:0; padding:0; font-family:'Do Hyeon', sans-serif; background:#0d1b
   </div>
 </div>
 
-<!-- 팝업 -->
 <div id="popup">
   <img id="popup-img" src="" alt="">
   <p id="popup-text"></p>
@@ -114,108 +90,103 @@ body { margin:0; padding:0; font-family:'Do Hyeon', sans-serif; background:#0d1b
 
 <script>
 document.addEventListener("DOMContentLoaded", ()=>{
-    const startScreen = document.getElementById("startScreen");
-    const startBtn = document.getElementById("startGameBtn");
-    const gameContainer = document.getElementById("gameContainer");
-    const bgm = document.getElementById("bgm");
-    const bgmToggle = document.getElementById("bgm-toggle");
-    const clickSound = document.getElementById("click-sound");
-    const log = document.getElementById("log");
-    const choices = document.getElementById("choices");
-    const eventImg = document.getElementById("event-img");
-    const monsterHealthDiv = document.getElementById("monster-health");
-    const monsterHealthInner = document.getElementById("monster-health-inner");
-    const popup = document.getElementById("popup");
-    const popupImg = document.getElementById("popup-img");
-    const popupText = document.getElementById("popup-text");
-    const popupBtn = document.getElementById("popup-btn");
+    const startScreen=document.getElementById("startScreen");
+    const startBtn=document.getElementById("startGameBtn");
+    const gameContainer=document.getElementById("gameContainer");
+    const bgm=document.getElementById("bgm");
+    const bgmToggle=document.getElementById("bgm-toggle");
+    const clickSound=document.getElementById("clickSound");
+    const log=document.getElementById("log");
+    const choices=document.getElementById("choices");
+    const eventImg=document.getElementById("event-img");
+    const monsterHealthDiv=document.getElementById("monster-health");
+    const monsterHealthInner=document.getElementById("monster-health-inner");
+    const popup=document.getElementById("popup");
+    const popupImg=document.getElementById("popup-img");
+    const popupText=document.getElementById("popup-text");
+    const popupBtn=document.getElementById("popup-btn");
 
-    let isBGMPlaying = false;
-    const characters = {player:"images/player.png", npc:"images/npc.png"};
+    let isBGMPlaying=false;
+    const characters={player:"images/player.png",npc:"images/npc.png"};
     let player, monster, zoneEvents;
-    const possibleEvents = ["monster","ally","box"];
-    const zones = {1:{monsterHp:200,monsterAtk:20},2:{monsterHp:300,monsterAtk:30},3:{monsterHp:400,monsterAtk:40},4:{monsterHp:500,monsterAtk:50},5:{monsterHp:350,monsterAtk:35},6:{monsterHp:250,monsterAtk:25},7:{monsterHp:350,monsterAtk:35},8:{monsterHp:400,monsterAtk:40},9:{monsterHp:450,monsterAtk:45},10:{monsterHp:500,monsterAtk:50}};
+    const possibleEvents=["monster","ally","box"];
+    const zones={1:{monsterHp:200,monsterAtk:20},2:{monsterHp:300,monsterAtk:30},3:{monsterHp:400,monsterAtk:40},4:{monsterHp:500,monsterAtk:50},5:{monsterHp:350,monsterAtk:35},6:{monsterHp:250,monsterAtk:25},7:{monsterHp:350,monsterAtk:35},8:{monsterHp:400,monsterAtk:40},9:{monsterHp:450,monsterAtk:45},10:{monsterHp:500,monsterAtk:50}};
 
-    function playClick(){ clickSound.currentTime=0; clickSound.play(); }
+    function initGame(){ resetGame(); }
 
     function writeMessage(text,speaker="npc",imgSrc=null){
-        const msgDiv = document.createElement("div");
+        const msgDiv=document.createElement("div");
         msgDiv.className="message "+(speaker==="player"?"player":"");
-        const img = document.createElement("img"); img.src=imgSrc||characters[speaker];
-        const bubble = document.createElement("div"); bubble.className="bubble"; bubble.innerText=text;
+        const img=document.createElement("img"); img.src=imgSrc||characters[speaker];
+        const bubble=document.createElement("div"); bubble.className="bubble"; bubble.innerText=text;
         msgDiv.appendChild(img); msgDiv.appendChild(bubble);
         log.appendChild(msgDiv);
-        log.scrollTop = log.scrollHeight;
+        log.scrollTop=log.scrollHeight;
     }
 
     function setChoices(options){
         choices.innerHTML="";
         options.forEach(opt=>{
-            const btn = document.createElement("button");
-            btn.innerText = opt.text;
-            btn.onclick = ()=>{
-                playClick();
-                opt.action();
-            };
+            const btn=document.createElement("button");
+            btn.innerText=opt.text;
+            btn.onclick=()=>{ clickSound.play(); opt.action(); };
             choices.appendChild(btn);
         });
     }
 
     function updateStats(){
         document.getElementById("player-hp").innerText=`체력: ${player.hp}`;
+        document.getElementById("player-attack").innerText=`공격: ${player.attack}`;
+        document.getElementById("player-defense").innerText=`방어: ${player.defense}`;
         monsterHealthInner.style.width=monster.maxHp?(monster.hp/monster.maxHp*100)+"%":"0%";
     }
 
     function setZoneDisplay(){ document.getElementById("zone-display").innerText=`현재 위치: ${player.zone}구역`; }
 
     function addItemToSlot(imgSrc){
-        const slots = document.querySelectorAll(".item-slot");
-        for(const slot of slots){
-            if(!slot.innerHTML){
-                const img = document.createElement("img"); img.src=imgSrc; img.style.width="80px"; img.style.height="80px";
-                slot.appendChild(img); break;
-            }
-        }
+        const slots=document.querySelectorAll(".item-slot");
+        for(const slot of slots){ if(!slot.innerHTML){ const img=document.createElement("img"); img.src=imgSrc; img.style.width="80px"; img.style.height="80px"; slot.appendChild(img); break; } }
     }
 
     function generateRandomEvents(){
-        zoneEvents = [];
-        for(let i=0;i<10;i++){
-            zoneEvents.push({type:possibleEvents[Math.floor(Math.random()*possibleEvents.length)]});
-        }
+        zoneEvents=[];
+        for(let i=0;i<10;i++){ zoneEvents.push({type:possibleEvents[Math.floor(Math.random()*possibleEvents.length)]}); }
     }
 
     function resetGame(){
-        player = {hp:300,maxHp:350,attack:100,defense:50,zone:1};
-        monster = {hp:0,maxHp:0,attack:0};
+        player={hp:300,maxHp:350,attack:100,defense:50,zone:1};
+        monster={hp:0,maxHp:0,attack:0};
         clearItems();
         log.innerHTML="";
         generateRandomEvents();
         setZoneDisplay();
         updateStats();
-        startCurrentZoneEvent();
+        startZoneEvent();
     }
 
     function clearItems(){ document.querySelectorAll(".item-slot").forEach(slot=>slot.innerHTML=""); }
 
     function nextZone(){
-        player.hp = Math.max(player.hp-5,0);
+        player.hp=Math.max(player.hp-5,0);
         if(player.hp<=0){ triggerFail(); return; }
         player.zone++;
         if(player.zone>10){ triggerClear(); return; }
-        startCurrentZoneEvent();
+
+        log.innerHTML=""; // 구역 이동 시 로그 초기화
+        startZoneEvent();
     }
 
-    function startCurrentZoneEvent(){
+    function startZoneEvent(){
+        log.innerHTML=""; // 구역 시작 시 항상 로그 초기화
         setZoneDisplay();
-        const event = zoneEvents[player.zone-1];
+        const event=zoneEvents[player.zone-1];
         monsterHealthDiv.style.display="none";
         eventImg.src=""; eventImg.classList.remove("glow");
 
         if(event.type==="monster"){
-            monster.maxHp = zones[player.zone].monsterHp;
-            monster.hp = monster.maxHp;
-            monster.attack = zones[player.zone].monsterAtk;
+            monster.maxHp=zones[player.zone].monsterHp;
+            monster.hp=monster.maxHp;
+            monster.attack=zones[player.zone].monsterAtk;
             eventImg.src="images/monster.png";
             monsterHealthDiv.style.display="block";
             updateStats();
@@ -250,7 +221,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
                     updateStats();
                     setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
                 }},
-                {text:"무시", action:()=>{
+                {text:"무시", action:()=>{ 
                     writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
                     nextZone();
                 }}
@@ -276,11 +247,12 @@ document.addEventListener("DOMContentLoaded", ()=>{
     }
 
     function flee(){
-        writeMessage("도망쳤습니다.","player");
         player.hp=Math.max(player.hp-5,0);
-        updateStats();
         if(player.hp<=0){ triggerFail(); return; }
-        startCurrentZoneEvent();
+
+        log.innerHTML=""; // 도망 시 로그 초기화
+        writeMessage("도망쳤습니다.","player");
+        startZoneEvent();
     }
 
     function triggerClear(){
@@ -302,7 +274,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
     }
 
     startBtn.onclick=()=>{
-        playClick();
         startScreen.style.opacity=0;
         setTimeout(()=>{
             startScreen.style.display="none";
@@ -311,12 +282,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
             setTimeout(()=>gameContainer.style.opacity=1,50);
             bgm.play().catch(()=>{});
             bgmToggle.innerText="🔊"; isBGMPlaying=true;
-            resetGame();
+            initGame();
         },500);
     };
 
     bgmToggle.onclick=()=>{
-        playClick();
         if(isBGMPlaying){ bgm.pause(); bgmToggle.innerText="🔇"; isBGMPlaying=false; }
         else{ bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true; }
     };
