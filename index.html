@@ -17,70 +17,122 @@ body {
 }
 
 .game-container {
+  width: 900px;
+  height: 600px;
   background: rgba(20, 30, 50, 0.95);
   border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-  padding: 20px;
-  width: 600px;
-  max-width: 90%;
+  display: grid;
+  grid-template-columns: 150px 1fr 150px;
+  grid-template-rows: 150px 1fr 200px;
+  gap: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* 캐릭터 얼굴 */
+#character-face {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  background: #1b2a41;
+  border-radius: 10px;
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 캐릭터 스탯 */
+#character-stats {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+  background: #223354;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 0.9rem;
+}
+
+/* 몬스터 */
+#monster {
+  grid-column: 2 / 3;
+  grid-row: 1 / 3;
+  background: #000;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 아이템 */
+#items {
+  grid-column: 3 / 4;
+  grid-row: 1 / 3;
+  background: #223354;
+  border-radius: 10px;
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  padding: 10px;
+}
+
+/* 이벤트 로그 + 선택지 */
+#event-log {
+  grid-column: 1 / 4;
+  grid-row: 3 / 4;
+  background: #1b2a41;
+  border-radius: 10px;
+  padding: 10px;
+  overflow-y: auto;
 }
 
 .message {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .message img {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
 }
 
 .bubble {
-  background: #1b2a41;
-  padding: 10px 15px;
-  border-radius: 15px;
+  background: #223354;
+  padding: 8px 12px;
+  border-radius: 12px;
   max-width: 80%;
   animation: fadeIn 0.3s ease;
 }
 
-.choices {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
+.message.player {
+  flex-direction: row-reverse;
 }
 
-.choices button {
+.message.player .bubble {
+  background: #4a90e2;
+}
+
+#choices {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#choices button {
   background: #4a90e2;
   border: none;
   border-radius: 8px;
-  padding: 10px 15px;
+  padding: 8px 12px;
   color: white;
-  font-weight: bold;
   cursor: pointer;
+  font-weight: bold;
   transition: 0.2s;
 }
 
-.choices button:hover {
+#choices button:hover {
   background: #357ab7;
   transform: translateY(-2px);
-}
-
-#startBGM {
-  background: #357ab7;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 15px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  margin-bottom: 10px;
 }
 
 @keyframes fadeIn {
@@ -92,50 +144,59 @@ body {
 <body>
 
 <div class="game-container">
-  <button id="startBGM">게임 시작</button>
-  <div class="messages" id="messages"></div>
-  <div class="choices" id="choices"></div>
+  <div id="character-face">
+    <img src="images/player.png" alt="캐릭터">
+  </div>
+  <div id="character-stats">
+    <p>공격: 100</p>
+    <p>방어: 50</p>
+    <p>체력: 300 / 350</p>
+    <p>상태: 🙂</p>
+  </div>
+  <div id="monster">
+    <img src="images/monster.png" alt="몬스터">
+  </div>
+  <div id="items">
+    <div>아이템1</div>
+    <div>아이템2</div>
+    <div>아이템3</div>
+    <div>아이템4</div>
+  </div>
+  <div id="event-log">
+    <div id="log"></div>
+    <div id="choices"></div>
+  </div>
 </div>
 
 <audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
 <script>
-const messages = document.getElementById("messages");
+const log = document.getElementById("log");
 const choices = document.getElementById("choices");
 const bgm = document.getElementById("bgm");
 
-// 캐릭터 이미지
+// 캐릭터/몬스터 이미지
 const characters = {
   player: "images/player.png",
-  npc: "images/npc.png"
+  monster: "images/monster.png"
 };
 
-// 효과음 재생
-function playSFX(url){
-  const sfx = new Audio(url);
-  sfx.play();
-}
-
 // 메시지 출력
-function writeMessage(text, speaker="npc"){
+function writeMessage(text, speaker="monster"){
   const msgDiv = document.createElement("div");
-  msgDiv.className = "message";
-
+  msgDiv.className = "message " + (speaker === "player" ? "player" : "");
+  
   const img = document.createElement("img");
   img.src = characters[speaker];
-
+  
   const bubble = document.createElement("div");
   bubble.className = "bubble";
   bubble.innerText = text;
-
-  if(speaker === "player"){
-    msgDiv.style.flexDirection = "row-reverse";
-  }
-
+  
   msgDiv.appendChild(img);
   msgDiv.appendChild(bubble);
-  messages.appendChild(msgDiv);
-  messages.scrollTop = messages.scrollHeight;
+  log.appendChild(msgDiv);
+  log.scrollTop = log.scrollHeight;
 }
 
 // 선택지 표시
@@ -152,27 +213,30 @@ function setChoices(options){
   });
 }
 
-// 게임 로직
+// 효과음 재생
+function playSFX(url){
+  const sfx = new Audio(url);
+  sfx.play();
+}
+
+// 게임 로직 예시
 function startGame(){
-  writeMessage("당신은 포트폴리오의 세계에 들어왔습니다.", "npc");
+  writeMessage("유령이 나타났습니다.", "monster");
   setChoices([
-    { text: "작업물 보기", action: () => {
-        writeMessage("여기서 제 포트폴리오 문서를 확인할 수 있습니다.", "player");
-        setChoices([{ text: "뒤로가기", action: startGame }]);
+    { text: "맞서 싸운다", action: () => {
+        writeMessage("유령과 싸워서 이겼습니다!", "player");
+        setChoices([{ text: "다음 진행", action: startGame }]);
     }},
-    { text: "기획자로서의 이야기 듣기", action: () => {
-        writeMessage("저는 수집형 RPG QA 경험과 기획 역량을 바탕으로 새로운 도전을 하고 있습니다.", "player");
-        setChoices([{ text: "뒤로가기", action: startGame }]);
+    { text: "도망간다", action: () => {
+        writeMessage("도망쳤습니다.", "player");
+        setChoices([{ text: "다음 진행", action: startGame }]);
     }}
   ]);
 }
 
-// BGM 시작 버튼 클릭 시 게임 시작
-document.getElementById("startBGM").onclick = () => {
-  bgm.play();
-  startGame();
-  document.getElementById("startBGM").style.display = "none";
-};
+// 게임 시작
+bgm.play();
+startGame();
 </script>
 
 </body>
