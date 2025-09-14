@@ -40,13 +40,13 @@ body {
 
 /* 게임 UI */
 .game-container {
-  width: 900px;
-  height: 600px;
+  width: 1000px;
+  height: 650px;
   background: rgba(20, 30, 50, 0.95);
   border-radius: 20px;
   display: grid;
-  grid-template-columns: 150px 1fr 150px;
-  grid-template-rows: 150px 1fr 200px;
+  grid-template-columns: 180px 1fr 180px;
+  grid-template-rows: 180px 1fr 220px;
   gap: 10px;
   padding: 10px;
   box-sizing: border-box;
@@ -87,17 +87,35 @@ body {
   justify-content: center;
   align-items: center;
 }
-#monster img { width: 150px; height: 150px; margin-bottom: 10px; }
-#monster-health { width: 80%; height: 15px; background: #555; border-radius: 8px; overflow: hidden; }
+#monster img { width: 250px; height: 250px; margin-bottom: 10px; }
+#monster-health { width: 80%; height: 20px; background: #555; border-radius: 8px; overflow: hidden; }
 #monster-health-inner { width: 100%; height: 100%; background: #e74c3c; transition: width 0.3s; }
 
 /* 아이템 박스 */
-#items { grid-column: 3 / 4; grid-row: 1 / 3; display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; align-items: center; padding: 10px; background: #223354; border-radius: 10px; }
+#items {
+  grid-column: 3 / 4;
+  grid-row: 1 / 3;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px;
+  background: #223354;
+  border-radius: 10px;
+}
 #items-label { font-size: 1rem; font-weight: bold; margin-bottom: 10px; }
 .item-slot { width: 100px; height: 100px; background: #334466; border-radius: 15px; }
 
 /* 이벤트 로그 + 선택지 */
-#event-log { grid-column: 1 / 4; grid-row: 3 / 4; background: #1b2a41; border-radius: 10px; padding: 10px; overflow-y: auto; }
+#event-log {
+  grid-column: 1 / 4;
+  grid-row: 3 / 4;
+  background: #1b2a41;
+  border-radius: 10px;
+  padding: 10px;
+  overflow-y: auto;
+}
 .message { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 5px; }
 .message img { width: 30px; height: 30px; border-radius: 50%; }
 .bubble { background: #223354; padding: 8px 12px; border-radius: 12px; max-width: 80%; animation: fadeIn 0.3s ease; }
