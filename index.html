@@ -23,6 +23,7 @@ body {
   position: relative;
 }
 
+/* 시작 버튼 */
 #startGameBtn {
   position: absolute;
   top: 50%;
@@ -34,8 +35,10 @@ body {
   border-radius: 10px;
   background: #4a90e2;
   color: #fff;
+  z-index: 1000;
 }
 
+/* 게임 UI */
 .game-container {
   width: 900px;
   height: 600px;
@@ -48,6 +51,7 @@ body {
   padding: 10px;
   box-sizing: border-box;
   display: none; /* 초기 숨김 */
+  z-index: 10;
 }
 
 /* 캐릭터 얼굴 */
@@ -105,7 +109,7 @@ body {
 #choices button:hover { background: #357ab7; transform: translateY(-2px); }
 
 /* BGM 토글 */
-#bgm-toggle { position: absolute; top: 15px; right: 15px; font-size: 28px; cursor: pointer; }
+#bgm-toggle { position: absolute; top: 15px; right: 15px; font-size: 28px; cursor: pointer; z-index:1000; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -143,6 +147,8 @@ body {
 <audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
 <script>
+document.addEventListener("DOMContentLoaded", () => {
+
 const log = document.getElementById("log");
 const choices = document.getElementById("choices");
 const bgm = document.getElementById("bgm");
@@ -215,17 +221,16 @@ function attack(){
 }
 
 function monsterTurn(){
-  let dmg = monsterTemplate.attack;
+  let dmg = Math.max(monsterTemplate.attack - player.defense/10, 1);
   player.hp -= dmg;
   if(player.hp<0) player.hp=0;
-  writeMessage(`몬스터가 공격! 플레이어가 ${dmg} 피해!`, "npc");
+  writeMessage(`몬스터의 공격! ${dmg} 피해!`, "npc");
   updateStats();
-  if(player.hp===0){ writeMessage("플레이어가 쓰러졌습니다...", "npc"); setChoices([]); }
-  else setChoices([{text:"공격", action:attack},{text:"도망", action:flee}]);
+  setChoices([{text:"공격", action:attack},{text:"도망", action:flee}]);
 }
 
 function flee(){
-  writeMessage("도망쳤습니다!", "player");
+  writeMessage("도망쳤습니다.", "player");
   setChoices([{text:"다음 전투", action:startBattle}]);
 }
 
@@ -233,4 +238,11 @@ function flee(){
 startBtn.onclick = () => {
   gameContainer.style.display = "grid";
   startBtn.style.display = "none";
- 
+  if(!isBGMPlaying){ bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true; }
+  startBattle();
+};
+
+});
+</script>
+</body>
+</html>
