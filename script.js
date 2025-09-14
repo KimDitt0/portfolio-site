@@ -1,47 +1,68 @@
-const textBox = document.getElementById("text-box");
+const messages = document.getElementById("messages");
 const choices = document.getElementById("choices");
 
-let storyIndex = 0;
+// 캐릭터 이미지
+const characters = {
+  player: "images/player.png",
+  npc: "images/npc.png"
+};
 
-const story = [
-  {
-    text: "…눈을 뜨니 낯선 교실이었다.",
-    choices: ["주위를 둘러본다", "다시 눈을 감는다"]
-  },
-  {
-    text: "교실 안에는 파란 교복을 입은 소녀가 앉아 있었다.",
-    choices: ["말을 건다", "도망친다"]
-  }
-];
-
-function showText(text, callback) {
-  textBox.innerHTML = "";
-  let i = 0;
-  let interval = setInterval(() => {
-    textBox.innerHTML += text[i];
-    i++;
-    if (i >= text.length) {
-      clearInterval(interval);
-      if (callback) callback();
-    }
-  }, 50); // 글자 출력 속도
+// 효과음
+function playSFX(url){
+  const sfx = new Audio(url);
+  sfx.play();
 }
 
-function showChoices(choicesArr) {
+// 말풍선 출력
+function writeMessage(text, speaker="npc"){
+  const msgDiv = document.createElement("div");
+  msgDiv.className = "message";
+
+  const img = document.createElement("img");
+  img.src = characters[speaker];
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerText = text;
+
+  if(speaker === "player"){
+    msgDiv.style.flexDirection = "row-reverse";
+  }
+
+  msgDiv.appendChild(img);
+  msgDiv.appendChild(bubble);
+  messages.appendChild(msgDiv);
+
+  messages.scrollTop = messages.scrollHeight;
+}
+
+// 선택지 표시
+function setChoices(options){
   choices.innerHTML = "";
-  choicesArr.forEach(choice => {
+  options.forEach(opt => {
     const btn = document.createElement("button");
-    btn.innerText = choice;
-    btn.classList.add("choice-btn");
-    btn.onclick = () => nextStory();
+    btn.innerText = opt.text;
+    btn.onclick = () => {
+      playSFX('audio/click.mp3');
+      opt.action();
+    };
     choices.appendChild(btn);
   });
 }
 
-function nextStory() {
-  const current = story[storyIndex];
-  showText(current.text, () => showChoices(current.choices));
-  storyIndex++;
+// 게임 시작
+function startGame(){
+  writeMessage("당신은 포트폴리오의 세계에 들어왔습니다.", "npc");
+  setChoices([
+    { text: "작업물 보기", action: () => {
+        writeMessage("여기서 제 포트폴리오 문서를 확인할 수 있습니다.", "player");
+        setChoices([{ text: "뒤로가기", action: startGame }]);
+    }},
+    { text: "기획자로서의 이야기 듣기", action: () => {
+        writeMessage("저는 수집형 RPG QA 경험과 기획 역량을 바탕으로 새로운 도전을 하고 있습니다.", "player");
+        setChoices([{ text: "뒤로가기", action: startGame }]);
+    }}
+  ]);
 }
 
-nextStory();
+startGame();

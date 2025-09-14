@@ -1,40 +1,73 @@
 ﻿body {
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(180deg, #dce6ff, #f8faff);
+  font-family: "Segoe UI", sans-serif;
+  background: url('images/background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
   margin: 0;
-  height: 100vh;
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100vh;
 }
 
 .game-container {
-  background: white;
+  background: rgba(20,30,50,0.9);
   border-radius: 20px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
   padding: 20px;
   width: 600px;
-  min-height: 200px;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-#text-box {
-  font-size: 18px;
-  margin-bottom: 20px;
-  min-height: 100px;
+.message {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.choice-btn {
-  display: block;
-  margin: 5px 0;
-  padding: 10px;
-  background: #4a6cf7;
-  color: white;
+.message img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.bubble {
+  background: #1b2a41;
+  padding: 10px 15px;
+  border-radius: 15px;
+  max-width: 80%;
+  animation: fadeIn 0.3s ease;
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.choices button {
+  background: #4a90e2;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
+  padding: 10px 15px;
+  color: white;
+  font-weight: bold;
   cursor: pointer;
   transition: 0.2s;
 }
 
-.choice-btn:hover {
-  background: #3652c5;
+.choices button:hover {
+  background: #357ab7;
+  transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

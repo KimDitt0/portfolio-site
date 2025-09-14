@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Blue Archive Style Adventure</title>
+  <link rel="stylesheet" href="style.css">
   <style>
     body { 
       font-family: "Segoe UI", sans-serif; 
@@ -85,6 +86,12 @@
   </style>
 </head>
 <body>
+  <audio id="bgm" src="audio/bgm.mp3" autoplay loop></audio>
+  
+  <div class="game-container">
+    <div class="messages" id="messages"></div>
+    <div class="choices" id="choices"></div>
+  </div>
   <div class="game-container">
     <h1>어서 와, 선생님!</h1>
     <div class="game-log" id="log"></div>
