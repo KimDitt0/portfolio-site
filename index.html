@@ -104,7 +104,8 @@ function writeMessage(text,speaker="npc",imgSrc=null){
   const img=document.createElement("img"); img.src=imgSrc||characters[speaker];
   const bubble=document.createElement("div"); bubble.className="bubble"; bubble.innerText=text;
   msgDiv.appendChild(img); msgDiv.appendChild(bubble);
-  log.appendChild(msgDiv); log.scrollTop=log.scrollHeight;
+  log.appendChild(msgDiv);
+  log.scrollTop=log.scrollHeight;
 }
 
 function setChoices(options){
@@ -176,7 +177,10 @@ function startZoneEvent(){
         writeMessage("앗싸!","player"); 
         setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
       }},
-      {text:"그냥 지나가기", action:()=>{ setChoices([{text:"다음 구역으로 가기", action:nextZone}]); } }
+      {text:"그냥 지나가기", action:()=>{
+        writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
+        setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
+      }}
     ]);
   } else if(event.type==="box"){
     monsterImg.src="images/box.png"; monsterImg.classList.add("blink");
@@ -189,7 +193,10 @@ function startZoneEvent(){
         writeMessage("상자를 열었습니다. 상자 속에서 [무지 캡 모자]를 획득하였습니다.","npc");
         setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
       }},
-      {text:"무시", action:()=>{ setChoices([{text:"다음 구역으로 가기", action:nextZone}]); } }
+      {text:"무시", action:()=>{
+        writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
+        setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
+      }}
     ]);
   }
 }
@@ -201,27 +208,23 @@ function attack(){
   updateStats();
   if(monster.hp<=0){
     writeMessage("유령을 처치했습니다!","npc");
-    setChoices([{text:"다음 구역 이동", action:nextZone}]);
-    return;
-  }
-  let monsterDmg=monster.attack; player.hp-=monsterDmg; if(player.hp<0) player.hp=0;
-  writeMessage(`유령에게 ${monsterDmg} 피해를 받았습니다!`,"npc");
-  updateStats();
-  if(player.hp<=0){
-    writeMessage("체력이 0이 되어 패배했습니다. 1구역으로 돌아갑니다.","npc");
-    player.hp=player.maxHp; player.zone=1; updateStats(); startZoneEvent();
+    setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
+  } else {
+    player.hp-=monster.attack; if(player.hp<0) player.hp=0;
+    writeMessage(`유령에게 ${monster.attack} 피해를 받았습니다!`,"npc"); updateStats();
+    if(player.hp<=0){ writeMessage("체력이 0이 되어 패배했습니다. 1구역으로 이동합니다.","npc"); player.hp=player.maxHp; player.zone=1; startZoneEvent(); }
   }
 }
 
-function flee(){ writeMessage("도망쳤습니다.","player"); setChoices([{text:"다시 전투 시작", action:startZoneEvent}]); }
+function flee(){ writeMessage("도망쳤습니다.","player"); nextZone(); }
 
 startBtn.onclick=()=>{
   gameContainer.style.display="grid"; startBtn.style.display="none";
   bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true;
   generateRandomEvents(); startZoneEvent();
 };
+
 });
 </script>
-
 </body>
 </html>
