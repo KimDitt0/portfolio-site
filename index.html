@@ -62,9 +62,8 @@ body {
   grid-row: 1 / 2;
   text-align: center;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
-.zone.active { color: #f1c40f; }
 
 /* 캐릭터 얼굴 */
 #character-face {
@@ -148,11 +147,7 @@ body {
 <audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
 <div class="game-container" id="gameContainer">
-  <div id="zone-display">
-    <span class="zone active">1구역</span> → 
-    <span class="zone">2구역</span> → 
-    <span class="zone">3구역</span>
-  </div>
+  <div id="zone-display">현재 위치: 1구역</div>
 
   <div id="character-face"><img src="images/player.png" alt="캐릭터"></div>
   <div id="character-stats">
@@ -211,8 +206,8 @@ const characters = { player: "images/player.png", npc: "images/npc.png" };
 
 // 구역 표시
 function setZone(currentZone){
-  const zoneEls = document.querySelectorAll("#zone-display .zone");
-  zoneEls.forEach((z, idx) => z.classList.toggle("active", idx+1===currentZone));
+  const zoneDisplay = document.getElementById("zone-display");
+  zoneDisplay.innerText = `현재 위치: ${currentZone}구역`;
 }
 
 // 메시지 출력
@@ -276,6 +271,7 @@ function attack(){
       writeMessage("모든 구역 클리어! 게임 승리!", "player");
       setChoices([{ text:"게임 다시 시작", action:restartGame }]);
     } else {
+      setZone(player.zone);
       writeMessage(`다음 구역으로 이동: ${player.zone}구역`, "player");
       setChoices([{ text:"다음 전투", action:startBattle }]);
     }
@@ -292,6 +288,7 @@ function monsterTurn(){
 
   if(player.hp<=0){
     player.zone = Math.max(player.zone-1,1);
+    setZone(player.zone);
     writeMessage(`패배! 이전 구역으로 이동합니다: ${player.zone}구역`, "npc");
     player.hp = player.maxHp;
     setTimeout(startBattle, 1000);
@@ -310,6 +307,7 @@ function flee(){
 function restartGame(){
   player.hp = player.maxHp;
   player.zone = 1;
+  setZone(player.zone);
   log.innerHTML = "";
   startBattle();
 }
