@@ -14,6 +14,7 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  position: relative;
 }
 
 .game-container {
@@ -38,6 +39,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#character-face img {
+  width: 80px;
+  height: 80px;
 }
 
 /* 캐릭터 스탯 */
@@ -91,8 +97,8 @@ body {
 }
 
 .message img {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
 }
 
@@ -135,6 +141,15 @@ body {
   transform: translateY(-2px);
 }
 
+/* BGM 토글 아이콘 */
+#bgm-toggle {
+  position: absolute; 
+  top: 15px; 
+  right: 15px; 
+  font-size: 28px; 
+  cursor: pointer;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
@@ -168,21 +183,25 @@ body {
   </div>
 </div>
 
+<!-- BGM 토글 -->
+<div id="bgm-toggle">🔇</div>
 <audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
 <script>
 const log = document.getElementById("log");
 const choices = document.getElementById("choices");
 const bgm = document.getElementById("bgm");
+const bgmToggle = document.getElementById("bgm-toggle");
+let isBGMPlaying = false;
 
-// 캐릭터/몬스터 이미지
+// 캐릭터/NPC 이미지
 const characters = {
   player: "images/player.png",
-  monster: "images/monster.png"
+  npc: "images/npc.png"
 };
 
 // 메시지 출력
-function writeMessage(text, speaker="monster"){
+function writeMessage(text, speaker="npc"){
   const msgDiv = document.createElement("div");
   msgDiv.className = "message " + (speaker === "player" ? "player" : "");
   
@@ -219,9 +238,22 @@ function playSFX(url){
   sfx.play();
 }
 
+// BGM 토글
+bgmToggle.onclick = () => {
+  if(isBGMPlaying){
+    bgm.pause();
+    bgmToggle.innerText = "🔇";
+    isBGMPlaying = false;
+  } else {
+    bgm.play().catch(() => {});
+    bgmToggle.innerText = "🔊";
+    isBGMPlaying = true;
+  }
+};
+
 // 게임 로직 예시
 function startGame(){
-  writeMessage("유령이 나타났습니다.", "monster");
+  writeMessage("유령이 나타났습니다.", "npc");
   setChoices([
     { text: "맞서 싸운다", action: () => {
         writeMessage("유령과 싸워서 이겼습니다!", "player");
@@ -235,7 +267,6 @@ function startGame(){
 }
 
 // 게임 시작
-bgm.play();
 startGame();
 </script>
 
