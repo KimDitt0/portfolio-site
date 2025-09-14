@@ -39,9 +39,32 @@ body { margin:0; padding:0; font-family:'Do Hyeon', sans-serif; background:#0d1b
 #popup img { max-width:300px; margin-bottom:20px; }
 #popup button { background:#4a90e2; color:#fff; border:none; border-radius:10px; padding:10px 20px; font-size:1rem; cursor:pointer; transition:0.3s; }
 #popup button:hover { transform:translateY(-2px); }
+
 @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
 .glow { animation: glow 0.8s ease infinite; }
 @keyframes glow { 0% {filter: brightness(1);} 50% {filter: brightness(2);} 100% {filter: brightness(1);} }
+
+/* 상자 흔들기 */
+@keyframes shake {
+  0% { transform: translate(0px, 0px) rotate(0deg); }
+  25% { transform: translate(-5px, 0px) rotate(-10deg); }
+  50% { transform: translate(5px, 0px) rotate(10deg); }
+  75% { transform: translate(-5px, 0px) rotate(-10deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+.shake { animation: shake 0.8s ease; }
+
+/* 조우자 방방 뛰기 */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+.bounce { animation: bounce 0.6s ease infinite; }
+
+/* 아이템 튀어나오기 */
+.item-slot img { transition: all 0.5s ease; transform: translateY(-30px); opacity: 0; }
+.item-slot img.show { transform: translateY(0); opacity: 1; }
+
 </style>
 </head>
 <body>
@@ -130,7 +153,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
             const btn=document.createElement("button");
             btn.innerText=opt.text;
             btn.onclick=()=>{
-                clickSound.volume = 0.2; // 클릭 사운드 볼륨
+                clickSound.volume = 0.2;
                 clickSound.play();
                 opt.action();
             };
@@ -149,7 +172,17 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     function addItemToSlot(imgSrc){
         const slots=document.querySelectorAll(".item-slot");
-        for(const slot of slots){ if(!slot.innerHTML){ const img=document.createElement("img"); img.src=imgSrc; img.style.width="80px"; img.style.height="80px"; slot.appendChild(img); break; } }
+        for(const slot of slots){
+            if(!slot.innerHTML){
+                const img=document.createElement("img");
+                img.src=imgSrc;
+                img.style.width="80px";
+                img.style.height="80px";
+                slot.appendChild(img);
+                setTimeout(()=>{ img.classList.add("show"); },50);
+                break;
+            }
+        }
     }
 
     function generateRandomEvents(){
@@ -175,17 +208,16 @@ document.addEventListener("DOMContentLoaded", ()=>{
         if(player.hp<=0){ triggerFail(); return; }
         player.zone++;
         if(player.zone>10){ triggerClear(); return; }
-
-        log.innerHTML=""; // 구역 이동 시 로그 초기화
+        log.innerHTML="";
         startZoneEvent();
     }
 
     function startZoneEvent(){
-        log.innerHTML=""; // 구역 시작 시 항상 로그 초기화
+        log.innerHTML="";
         setZoneDisplay();
         const event=zoneEvents[player.zone-1];
         monsterHealthDiv.style.display="none";
-        eventImg.src=""; eventImg.classList.remove("glow");
+        eventImg.src=""; eventImg.classList.remove("glow","bounce");
 
         if(event.type==="monster"){
             monster.maxHp=zones[player.zone].monsterHp;
@@ -198,9 +230,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
             setChoices([{text:"공격",action:attack},{text:"도망",action:flee}]);
         } else if(event.type==="ally"){
             eventImg.src="images/ally.png";
+            eventImg.classList.add("bounce");
             writeMessage("조우자를 만났습니다! 페로페로~","npc");
             setChoices([
                 {text:"대화하기", action:()=>{
+                    eventImg.classList.remove("bounce");
                     writeMessage("체력 50 회복!","npc");
                     player.hp=Math.min(player.hp+50,player.maxHp);
                     updateStats();
@@ -208,6 +242,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
                     setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
                 }},
                 {text:"그냥 지나가기", action:()=>{
+                    eventImg.classList.remove("bounce");
                     writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
                     setTimeout(nextZone,1000);
                 }}
@@ -217,15 +252,18 @@ document.addEventListener("DOMContentLoaded", ()=>{
             writeMessage("상자를 발견했습니다!","npc");
             setChoices([
                 {text:"열기", action:()=>{
-                    eventImg.classList.remove("glow");
-                    eventImg.src="images/equipment.png";
-                    addItemToSlot("images/equipment.png");
-                    writeMessage("상자에서 장비 획득! 공격력+20, 체력+20","npc");
-                    player.attack+=20; player.maxHp+=20; player.hp+=20;
-                    updateStats();
-                    setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
+                    eventImg.classList.add("shake");
+                    setTimeout(()=>{
+                        eventImg.classList.remove("shake");
+                        eventImg.src="images/equipment.png";
+                        addItemToSlot("images/equipment.png");
+                        writeMessage("상자에서 장비 획득! 공격력+20, 체력+20","npc");
+                        player.attack+=20; player.maxHp+=20; player.hp+=20;
+                        updateStats();
+                        setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
+                    },800);
                 }},
-                {text:"무시", action:()=>{ 
+                {text:"무시", action:()=>{
                     writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
                     setTimeout(nextZone,1000);
                 }}
@@ -253,8 +291,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     function flee(){
         player.hp=Math.max(player.hp-5,0);
         if(player.hp<=0){ triggerFail(); return; }
-
-        log.innerHTML=""; // 도망 시 로그 초기화
+        log.innerHTML="";
         writeMessage("도망쳤습니다.","player");
         startZoneEvent();
     }
@@ -284,7 +321,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
             gameContainer.style.display="grid";
             gameContainer.style.opacity=0;
             setTimeout(()=>gameContainer.style.opacity=1,50);
-            bgm.volume = 0.5; // BGM 볼륨 50%
+            bgm.volume = 0.5;
             bgm.play().catch(()=>{});
             bgmToggle.innerText="🔊"; isBGMPlaying=true;
             initGame();
