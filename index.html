@@ -209,7 +209,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
                 }},
                 {text:"그냥 지나가기", action:()=>{
                     writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-                    setTimeout(nextZone,800);
+                    setTimeout(nextZone,1000);
                 }}
             ]);
         } else if(event.type==="box"){
@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
                 }},
                 {text:"무시", action:()=>{ 
                     writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-                    setTimeout(nextZone,800);
+                    setTimeout(nextZone,1000);
                 }}
             ]);
         }
