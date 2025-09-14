@@ -13,13 +13,14 @@ body {
   background: #0d1b2a;
   color: #fff;
   display:flex; justify-content:center; align-items:center;
-  height:100vh; position:relative;
+  height:100vh; overflow:hidden;
 }
 
-/* 시작 화면 */
+/* 시작 씬 */
 #startScreen {
+  position:absolute; top:0; left:0; width:100%; height:100%;
   display:flex; flex-direction:column; justify-content:center; align-items:center;
-  width:100%; height:100vh; text-align:center;
+  text-align:center; transition: opacity 1s;
 }
 #startScreen img { width:250px; margin-bottom:20px; }
 #startScreen h1 { margin:10px 0; font-size:2rem; }
@@ -28,30 +29,39 @@ body {
 /* BGM toggle */
 #bgm-toggle { position:absolute; top:15px; right:15px; font-size:28px; cursor:pointer; z-index:1000; }
 
-/* 게임 화면 */
-.game-container {
+/* 게임 씬 */
+#gameContainer {
   display:none;
   width:1000px; height:650px;
-  background-image: url('images/background.png');
-  background-size: cover;
-  background-position: center;
+  background: rgba(20,30,50,0.9);
   border-radius:20px;
   display:grid;
   grid-template-columns:180px 1fr 180px;
-  grid-template-rows:50px 180px 1fr 220px;
+  grid-template-rows:50px 220px 1fr 180px;
   gap:10px; padding:10px; box-sizing:border-box;
+  transition: opacity 1s;
 }
 #zone-display { grid-column:1/4; grid-row:1/2; text-align:center; font-weight:bold; font-size:2rem; }
+
+/* 캐릭터 */
 #character-face { grid-column:1/2; grid-row:2/3; background:#1b2a41; border-radius:10px; display:flex; justify-content:center; align-items:center; }
-#character-face img { width:150px; height:150px; }
+#character-face img { width:120px; height:120px; }
 #character-stats { grid-column:1/2; grid-row:3/4; background:#223354; border-radius:10px; padding:10px; font-size:0.9rem; }
-#monster { grid-column:2/3; grid-row:2/4; background:#000; border-radius:10px; display:flex; flex-direction:column; justify-content:center; align-items:center; }
-#monster img { width:250px; height:250px; margin-bottom:10px; }
+
+/* 중앙 이벤트 박스 */
+#event-box { grid-column:2/3; grid-row:2/4; position:relative; background-image: url('images/background.png'); background-size:cover; background-position:center; border-radius:10px; display:flex; justify-content:center; align-items:center; flex-direction:column; }
+#event-box img { max-width:80%; max-height:80%; }
+
+/* 몬스터 체력바 */
 #monster-health { width:80%; height:20px; background:#555; border-radius:8px; overflow:hidden; display:none; margin-top:10px; }
 #monster-health-inner { width:100%; height:100%; background:#e74c3c; transition:width 0.3s; }
+
+/* 아이템 슬롯 */
 #items { grid-column:3/4; grid-row:2/4; display:flex; flex-direction:column; gap:10px; justify-content:flex-start; align-items:center; padding:10px; background:#223354; border-radius:10px; }
 #items-label { font-size:1rem; font-weight:bold; margin-bottom:10px; }
 .item-slot { width:100px; height:100px; background:#334466; border-radius:15px; display:flex; justify-content:center; align-items:center; }
+
+/* 이벤트 로그 */
 #event-log { grid-column:1/4; grid-row:4/5; background:#1b2a41; border-radius:10px; padding:10px; overflow-y:auto; }
 .message { display:flex; align-items:flex-start; gap:10px; margin-bottom:5px; }
 .message img { width:30px; height:30px; border-radius:50%; }
@@ -61,15 +71,16 @@ body {
 #choices { margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; }
 #choices button { background:#4a90e2; border:none; border-radius:8px; padding:8px 12px; color:white; cursor:pointer; font-weight:bold; transition:0.2s; }
 #choices button:hover { background:#357ab7; transform:translateY(-2px); }
+
 @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
-.blink { animation: blink 0.6s ease infinite alternate; }
-@keyframes blink { from{filter: brightness(1);} to{filter: brightness(1.8);} }
 .glow { animation: glow 0.8s ease infinite; }
 @keyframes glow { 0% {filter: brightness(1);} 50% {filter: brightness(2);} 100% {filter: brightness(1);} }
+
 </style>
 </head>
 <body>
 
+<!-- 시작 씬 -->
 <div id="startScreen">
   <img src="images/game-logo.png" alt="게임 로고">
   <h1>오싹! 위기 일발! 납량체험의 날!</h1>
@@ -79,6 +90,7 @@ body {
 <div id="bgm-toggle">🔇</div>
 <audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
+<!-- 게임 씬 -->
 <div class="game-container" id="gameContainer">
   <div id="zone-display">현재 위치: 1구역</div>
   <div id="character-face"><img src="images/player.png" alt="캐릭터"></div>
@@ -88,8 +100,8 @@ body {
     <p id="player-hp">체력: 300 / 350</p>
     <p>상태: 🙂</p>
   </div>
-  <div id="monster">
-    <img src="images/monster.png" alt="몬스터">
+  <div id="event-box">
+    <img id="event-img" src="" alt="">
     <div id="monster-health"><div id="monster-health-inner"></div></div>
   </div>
   <div id="items">
@@ -104,6 +116,35 @@ body {
     <div id="choices"></div>
   </div>
 </div>
+
+<script>
+// JS: 페이드 전환, 씬 전환, BGM 토글, 기본 변수, 이벤트 박스 이미지 제어 등
+const startScreen = document.getElementById("startScreen");
+const startBtn = document.getElementById("startGameBtn");
+const gameContainer = document.getElementById("gameContainer");
+const bgm = document.getElementById("bgm");
+const bgmToggle = document.getElementById("bgm-toggle");
+let isBGMPlaying = false;
+
+startBtn.onclick = () => {
+  startScreen.style.opacity = 0;
+  setTimeout(()=>{
+    startScreen.style.display = "none";
+    gameContainer.style.display = "grid";
+    gameContainer.style.opacity = 0;
+    setTimeout(()=> gameContainer.style.opacity = 1, 50);
+    bgm.play().catch(()=>{});
+    isBGMPlaying = true; bgmToggle.innerText = "🔊";
+    // 게임 로직 시작
+    // startZoneEvent(); 등
+  },1000);
+};
+
+bgmToggle.onclick = () => {
+  if(isBGMPlaying){ bgm.pause(); bgmToggle.innerText="🔇"; }
+  else{ bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; }
+  isBGMPlaying = !isBGMPlaying;
+};
 
 <script>
 document.addEventListener("DOMContentLoaded", ()=>{
