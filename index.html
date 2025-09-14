@@ -214,7 +214,7 @@ bgmToggle.onclick = () => {
 // 체력 업데이트
 function updateStats(){
   document.getElementById("player-hp").innerText = `체력: ${player.hp} / ${player.maxHp}`;
-  document.getElementById("monster-health-inner").style.width = `${(monster.hp / monsterTemplate.maxHp)*100}%`;
+  document.getElementById("monster-health-inner").style.width = `${(monster.hp / monsterTemplate.maxHp) * 100}%`;
 }
 
 // 전투 시작
@@ -227,7 +227,7 @@ function startBattle(){
 }
 
 function attack(){
-  if(player.hp === 0) return; // 패배 상태면 공격 못 함
+  if(player.hp <= 0) return; // 패배 상태면 공격 못 함
   let dmg = Math.max(player.attack - 20, 5);
   monster.hp -= dmg;
   if(monster.hp<0) monster.hp=0;
@@ -247,7 +247,8 @@ function monsterTurn(){
   writeMessage(`몬스터의 공격! ${dmg} 피해!`, "npc");
   updateStats();
 
-  if(player.hp === 0){
+  if(player.hp <= 0){
+    player.hp = 0;
     writeMessage("플레이어가 패배했습니다!", "npc");
     setChoices([{ text: "게임 다시 시작", action: restartGame }]);
   } else {
