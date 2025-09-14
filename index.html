@@ -280,6 +280,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
             gameContainer.style.display="grid";
             gameContainer.style.opacity=0;
             setTimeout(()=>gameContainer.style.opacity=1,50);
+            bgm.volum = 0.5;
             bgm.play().catch(()=>{});
             bgmToggle.innerText="🔊"; isBGMPlaying=true;
             initGame();
