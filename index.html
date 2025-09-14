@@ -38,6 +38,9 @@ body {
   z-index: 1000;
 }
 
+/* BGM 토글 */
+#bgm-toggle { position: absolute; top: 15px; right: 15px; font-size: 28px; cursor: pointer; z-index:1000; }
+
 /* 게임 UI */
 .game-container {
   width: 1000px;
@@ -46,18 +49,27 @@ body {
   border-radius: 20px;
   display: grid;
   grid-template-columns: 180px 1fr 180px;
-  grid-template-rows: 180px 1fr 220px;
+  grid-template-rows: 50px 180px 1fr 220px;
   gap: 10px;
   padding: 10px;
   box-sizing: border-box;
   display: none; /* 초기 숨김 */
-  z-index: 10;
 }
+
+/* 구역 표시 */
+#zone-display {
+  grid-column: 1 / 4;
+  grid-row: 1 / 2;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.zone.active { color: #f1c40f; }
 
 /* 캐릭터 얼굴 */
 #character-face {
   grid-column: 1 / 2;
-  grid-row: 1 / 2;
+  grid-row: 2 / 3;
   background: #1b2a41;
   border-radius: 10px;
   display: flex;
@@ -69,7 +81,7 @@ body {
 /* 캐릭터 스탯 */
 #character-stats {
   grid-column: 1 / 2;
-  grid-row: 2 / 3;
+  grid-row: 3 / 4;
   background: #223354;
   border-radius: 10px;
   padding: 10px;
@@ -79,7 +91,7 @@ body {
 /* 몬스터 */
 #monster {
   grid-column: 2 / 3;
-  grid-row: 1 / 3;
+  grid-row: 2 / 4;
   background: #000;
   border-radius: 10px;
   display: flex;
@@ -94,7 +106,7 @@ body {
 /* 아이템 박스 */
 #items {
   grid-column: 3 / 4;
-  grid-row: 1 / 3;
+  grid-row: 2 / 4;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -110,7 +122,7 @@ body {
 /* 이벤트 로그 + 선택지 */
 #event-log {
   grid-column: 1 / 4;
-  grid-row: 3 / 4;
+  grid-row: 4 / 5;
   background: #1b2a41;
   border-radius: 10px;
   padding: 10px;
@@ -126,17 +138,22 @@ body {
 #choices button { background: #4a90e2; border: none; border-radius: 8px; padding: 8px 12px; color: white; cursor: pointer; font-weight: bold; transition: 0.2s; }
 #choices button:hover { background: #357ab7; transform: translateY(-2px); }
 
-/* BGM 토글 */
-#bgm-toggle { position: absolute; top: 15px; right: 15px; font-size: 28px; cursor: pointer; z-index:1000; }
-
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 
 <button id="startGameBtn">게임 시작</button>
+<div id="bgm-toggle">🔇</div>
+<audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
 <div class="game-container" id="gameContainer">
+  <div id="zone-display">
+    <span class="zone active">1구역</span> → 
+    <span class="zone">2구역</span> → 
+    <span class="zone">3구역</span>
+  </div>
+
   <div id="character-face"><img src="images/player.png" alt="캐릭터"></div>
   <div id="character-stats">
     <p id="player-attack">공격: 100</p>
@@ -144,10 +161,12 @@ body {
     <p id="player-hp">체력: 300 / 350</p>
     <p>상태: 🙂</p>
   </div>
+
   <div id="monster">
     <img src="images/monster.png" alt="몬스터">
     <div id="monster-health"><div id="monster-health-inner"></div></div>
   </div>
+
   <div id="items">
     <div id="items-label">아이템</div>
     <div class="item-slot"></div>
@@ -155,14 +174,12 @@ body {
     <div class="item-slot"></div>
     <div class="item-slot"></div>
   </div>
+
   <div id="event-log">
     <div id="log"></div>
     <div id="choices"></div>
   </div>
 </div>
-
-<div id="bgm-toggle">🔇</div>
-<audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -175,18 +192,33 @@ const gameContainer = document.getElementById("gameContainer");
 const startBtn = document.getElementById("startGameBtn");
 let isBGMPlaying = false;
 
-// 플레이어 / 몬스터 정보
-let player = { hp: 300, maxHp: 350, attack: 100, defense: 50 };
+// 플레이어 정보
+let player = { hp: 300, maxHp: 350, attack: 100, defense: 50, zone: 1 };
+
+// 몬스터 기본 템플릿
 let monsterTemplate = { maxHp: 200, attack: 20 };
 let monster = { hp: monsterTemplate.maxHp };
+
+// 구역별 난이도
+const zones = {
+  1: { monsterHp: 200, monsterAtk: 20 },
+  2: { monsterHp: 300, monsterAtk: 30 },
+  3: { monsterHp: 400, monsterAtk: 40 }
+};
 
 // 캐릭터/NPC 이미지
 const characters = { player: "images/player.png", npc: "images/npc.png" };
 
+// 구역 표시
+function setZone(currentZone){
+  const zoneEls = document.querySelectorAll("#zone-display .zone");
+  zoneEls.forEach((z, idx) => z.classList.toggle("active", idx+1===currentZone));
+}
+
 // 메시지 출력
 function writeMessage(text, speaker="npc"){
   const msgDiv = document.createElement("div");
-  msgDiv.className = "message " + (speaker === "player" ? "player" : "");
+  msgDiv.className = "message " + (speaker==="player"?"player":"");
   const img = document.createElement("img"); img.src = characters[speaker];
   const bubble = document.createElement("div"); bubble.className="bubble"; bubble.innerText=text;
   msgDiv.appendChild(img); msgDiv.appendChild(bubble);
@@ -220,42 +252,55 @@ function updateStats(){
 // 전투 시작
 function startBattle(){
   log.innerHTML = ""; // 이전 로그 제거
+  const z = player.zone;
+  monsterTemplate.maxHp = zones[z].monsterHp;
+  monsterTemplate.attack = zones[z].monsterAtk;
   monster.hp = monsterTemplate.maxHp;
+
+  setZone(player.zone);
   updateStats();
-  writeMessage("유령이 나타났습니다!", "npc");
+  writeMessage(`구역 ${player.zone}에서 유령이 나타났습니다!`, "npc");
   setChoices([{text:"공격", action:attack},{text:"도망", action:flee}]);
 }
 
+// 공격
 function attack(){
-  if(player.hp <= 0) return; // 패배 상태면 공격 못 함
+  if(player.hp<=0) return;
   let dmg = Math.max(player.attack - 20, 5);
-  monster.hp -= dmg;
-  if(monster.hp<0) monster.hp=0;
+  monster.hp -= dmg; if(monster.hp<0) monster.hp=0;
   writeMessage(`몬스터에게 ${dmg} 피해!`, "player");
   updateStats();
   if(monster.hp===0){
-    writeMessage("몬스터를 처치했습니다!", "player");
-    setChoices([{text:"다음 전투", action:startBattle}]);
+    player.zone++;
+    if(player.zone>3){
+      writeMessage("모든 구역 클리어! 게임 승리!", "player");
+      setChoices([{ text:"게임 다시 시작", action:restartGame }]);
+    } else {
+      writeMessage(`다음 구역으로 이동: ${player.zone}구역`, "player");
+      setChoices([{ text:"다음 전투", action:startBattle }]);
+    }
   } else { monsterTurn(); }
 }
 
+// 몬스터 공격
 function monsterTurn(){
-  if(player.hp <= 0) return; // 이미 패배
+  if(player.hp<=0) return;
   let dmg = Math.max(monsterTemplate.attack - player.defense/10, 1);
-  player.hp -= dmg;
-  if(player.hp < 0) player.hp = 0;
+  player.hp -= dmg; if(player.hp<0) player.hp=0;
   writeMessage(`몬스터의 공격! ${dmg} 피해!`, "npc");
   updateStats();
 
-  if(player.hp <= 0){
-    player.hp = 0;
-    writeMessage("플레이어가 패배했습니다!", "npc");
-    setChoices([{ text: "게임 다시 시작", action: restartGame }]);
+  if(player.hp<=0){
+    player.zone = Math.max(player.zone-1,1);
+    writeMessage(`패배! 이전 구역으로 이동합니다: ${player.zone}구역`, "npc");
+    player.hp = player.maxHp;
+    setTimeout(startBattle, 1000);
   } else {
     setChoices([{text:"공격", action:attack},{text:"도망", action:flee}]);
   }
 }
 
+// 도망
 function flee(){
   writeMessage("도망쳤습니다.", "player");
   setChoices([{text:"다음 전투", action:startBattle}]);
@@ -264,6 +309,7 @@ function flee(){
 // 게임 재시작
 function restartGame(){
   player.hp = player.maxHp;
+  player.zone = 1;
   log.innerHTML = "";
   startBattle();
 }
