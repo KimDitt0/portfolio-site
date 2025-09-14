@@ -1,0 +1,40 @@
+﻿body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(180deg, #dce6ff, #f8faff);
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.game-container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  padding: 20px;
+  width: 600px;
+  min-height: 200px;
+}
+
+#text-box {
+  font-size: 18px;
+  margin-bottom: 20px;
+  min-height: 100px;
+}
+
+.choice-btn {
+  display: block;
+  margin: 5px 0;
+  padding: 10px;
+  background: #4a6cf7;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.choice-btn:hover {
+  background: #3652c5;
+}
