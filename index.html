@@ -53,7 +53,7 @@ body {
   gap: 10px;
   padding: 10px;
   box-sizing: border-box;
-  display: none; /* 초기 숨김 */
+  display: none;
 }
 
 /* 구역 표시 */
@@ -62,7 +62,7 @@ body {
   grid-row: 1 / 2;
   text-align: center;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.8rem; /* 폰트 크기 키움 */
 }
 
 /* 캐릭터 얼굴 */
@@ -75,7 +75,7 @@ body {
   justify-content: center;
   align-items: center;
 }
-#character-face img { width: 100px; height: 100px; }
+#character-face img { width: 150px; height: 150px; }
 
 /* 캐릭터 스탯 */
 #character-stats {
@@ -116,7 +116,7 @@ body {
   border-radius: 10px;
 }
 #items-label { font-size: 1rem; font-weight: bold; margin-bottom: 10px; }
-.item-slot { width: 100px; height: 100px; background: #334466; border-radius: 15px; }
+.item-slot { width: 100px; height: 100px; background: #334466; border-radius: 15px; display:flex; justify-content:center; align-items:center; }
 
 /* 이벤트 로그 + 선택지 */
 #event-log {
@@ -211,11 +211,14 @@ function setZone(currentZone){
 }
 
 // 메시지 출력
-function writeMessage(text, speaker="npc"){
+function writeMessage(text, speaker="npc", imgSrc=null){
   const msgDiv = document.createElement("div");
   msgDiv.className = "message " + (speaker==="player"?"player":"");
-  const img = document.createElement("img"); img.src = characters[speaker];
-  const bubble = document.createElement("div"); bubble.className="bubble"; bubble.innerText=text;
+  const img = document.createElement("img");
+  img.src = imgSrc || characters[speaker];
+  const bubble = document.createElement("div");
+  bubble.className="bubble";
+  bubble.innerText=text;
   msgDiv.appendChild(img); msgDiv.appendChild(bubble);
   log.appendChild(msgDiv);
   log.scrollTop = log.scrollHeight;
@@ -244,14 +247,45 @@ function updateStats(){
   document.getElementById("monster-health-inner").style.width = `${(monster.hp / monsterTemplate.maxHp) * 100}%`;
 }
 
+// 아이템 슬롯에 장비 추가
+function addItemToSlot(imgSrc){
+  const itemSlots = document.querySelectorAll(".item-slot");
+  for(const slot of itemSlots){
+    if(!slot.innerHTML){
+      const img = document.createElement("img");
+      img.src = imgSrc;
+      img.style.width="80px";
+      img.style.height="80px";
+      slot.appendChild(img);
+      break;
+    }
+  }
+}
+
+// 랜덤 이벤트
+function randomEvent(){
+  const eventChance = Math.random();
+  if(eventChance < 0.4){ // 상자
+    writeMessage("상자를 발견했습니다! 장비를 획득했습니다.", "player", "images/box.png");
+    addItemToSlot("images/equipment.png");
+  } else if(eventChance < 0.7){ // 조우자
+    const heal = 50;
+    player.hp = Math.min(player.hp + heal, player.maxHp);
+    writeMessage(`조우자를 만나 체력이 ${heal} 회복되었습니다!`, "player", "images/ally.png");
+    updateStats();
+  } else {
+    writeMessage("이번 구역은 조용합니다...", "npc");
+  }
+}
+
 // 전투 시작
 function startBattle(){
-  log.innerHTML = ""; // 이전 로그 제거
+  log.innerHTML = "";
+  randomEvent(); // 랜덤 이벤트
   const z = player.zone;
   monsterTemplate.maxHp = zones[z].monsterHp;
   monsterTemplate.attack = zones[z].monsterAtk;
   monster.hp = monsterTemplate.maxHp;
-
   setZone(player.zone);
   updateStats();
   writeMessage(`구역 ${player.zone}에서 유령이 나타났습니다!`, "npc");
@@ -263,35 +297,24 @@ function attack(){
   if(player.hp<=0) return;
   let dmg = Math.max(player.attack - 20, 5);
   monster.hp -= dmg; if(monster.hp<0) monster.hp=0;
-  writeMessage(`몬스터에게 ${dmg} 피해!`, "player");
-  updateStats();
-  if(monster.hp===0){
+  writeMessage(`유령에게 ${dmg} 피해를 주었습니다!`, "player");
+  if(monster.hp <=0){
+    writeMessage("유령을 처치했습니다!", "npc");
     player.zone++;
-    if(player.zone>3){
-      writeMessage("모든 구역 클리어! 게임 승리!", "player");
-      setChoices([{ text:"게임 다시 시작", action:restartGame }]);
-    } else {
-      setZone(player.zone);
-      writeMessage(`다음 구역으로 이동: ${player.zone}구역`, "player");
-      setChoices([{ text:"다음 전투", action:startBattle }]);
-    }
-  } else { monsterTurn(); }
-}
-
-// 몬스터 공격
-function monsterTurn(){
-  if(player.hp<=0) return;
-  let dmg = Math.max(monsterTemplate.attack - player.defense/10, 1);
-  player.hp -= dmg; if(player.hp<0) player.hp=0;
-  writeMessage(`몬스터의 공격! ${dmg} 피해!`, "npc");
+    if(player.zone > 3){ writeMessage("모든 구역 클리어!", "npc"); player.zone=1; }
+    setChoices([{text:"다음 구역 이동", action:startBattle}]);
+    return;
+  }
+  // 몬스터 공격
+  let monsterDmg = monster.attack;
+  player.hp -= monsterDmg; if(player.hp<0) player.hp=0;
+  writeMessage(`유령에게 ${monsterDmg} 피해를 받았습니다!`, "npc");
   updateStats();
-
   if(player.hp<=0){
-    player.zone = Math.max(player.zone-1,1);
-    setZone(player.zone);
-    writeMessage(`패배! 이전 구역으로 이동합니다: ${player.zone}구역`, "npc");
-    player.hp = player.maxHp;
-    setTimeout(startBattle, 1000);
+    writeMessage("체력이 0이 되어 패배했습니다. 1구역으로 돌아갑니다.", "npc");
+    player.hp = player.maxHp; player.zone = 1;
+    setChoices([{text:"처음부터 다시", action:startBattle}]);
+    updateStats();
   } else {
     setChoices([{text:"공격", action:attack},{text:"도망", action:flee}]);
   }
@@ -300,22 +323,13 @@ function monsterTurn(){
 // 도망
 function flee(){
   writeMessage("도망쳤습니다.", "player");
-  setChoices([{text:"다음 전투", action:startBattle}]);
+  setChoices([{text:"다시 전투 시작", action:startBattle}]);
 }
 
-// 게임 재시작
-function restartGame(){
-  player.hp = player.maxHp;
-  player.zone = 1;
-  setZone(player.zone);
-  log.innerHTML = "";
-  startBattle();
-}
-
-// 게임 시작 버튼
+// 게임 시작
 startBtn.onclick = () => {
-  gameContainer.style.display = "grid";
-  startBtn.style.display = "none";
+  gameContainer.style.display="grid";
+  startBtn.style.display="none";
   if(!isBGMPlaying){ bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true; }
   startBattle();
 };
