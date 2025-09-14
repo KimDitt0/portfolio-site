@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>나의 포트폴리오</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #111; color: #eee; }
+    .game-log { border: 1px solid #555; padding: 10px; height: 200px; overflow-y: auto; background: #222; }
+    .choices button { margin: 5px; }
+  </style>
+</head>
+<body>
+  <h1>환영합니다! 🚀</h1>
+  <p>이곳은 저의 포트폴리오 사이트입니다.</p>
+  
+  <h2>텍스트 어드벤처 게임</h2>
+  <div class="game-log" id="log"></div>
+  <div class="choices" id="choices"></div>
+
+  <script>
+    const log = document.getElementById("log");
+    const choices = document.getElementById("choices");
+
+    function write(text) {
+      log.innerHTML += `<p>${text}</p>`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function setChoices(options) {
+      choices.innerHTML = "";
+      options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.innerText = opt.text;
+        btn.onclick = opt.action;
+        choices.appendChild(btn);
+      });
+    }
+
+    // 게임 시작
+    write("당신은 포트폴리오의 세계에 들어왔습니다.");
+    setChoices([
+      { text: "작업물 보기", action: () => {
+        write("여기서 제 포트폴리오 문서를 확인할 수 있습니다.");
+        setChoices([{ text: "뒤로가기", action: startGame }]);
+      }},
+      { text: "기획자로서의 이야기 듣기", action: () => {
+        write("저는 수집형 RPG QA 경험과 기획 역량을 바탕으로 새로운 도전을 하고 있습니다.");
+        setChoices([{ text: "뒤로가기", action: startGame }]);
+      }}
+    ]);
+
+    function startGame() {
+      write("당신은 다시 선택의 기로에 서 있습니다.");
+      setChoices([
+        { text: "작업물 보기", action: () => {
+          write("여기서 제 포트폴리오 문서를 확인할 수 있습니다.");
+          setChoices([{ text: "뒤로가기", action: startGame }]);
+        }},
+        { text: "기획자로서의 이야기 듣기", action: () => {
+          write("저는 수집형 RPG QA 경험과 기획 역량을 바탕으로 새로운 도전을 하고 있습니다.");
+          setChoices([{ text: "뒤로가기", action: startGame }]);
+        }}
+      ]);
+    }
+  </script>
+</body>
+</html>
