@@ -158,8 +158,7 @@ function startZoneEvent(){
   const monsterImg=monsterDiv.querySelector("img");
   const monsterHealthDiv=document.getElementById("monster-health");
 
-  // 몬스터 체력바 숨김 기본
-  monsterHealthDiv.style.display="none";
+  monsterHealthDiv.style.display="none"; // 몬스터 체력바 숨김 기본
 
   if(event.type==="monster"){
     monster.maxHp=zones[player.zone].monsterHp; monster.hp=monster.maxHp; monster.attack=zones[player.zone].monsterAtk;
@@ -168,28 +167,29 @@ function startZoneEvent(){
     writeMessage(`구역 ${player.zone}에서 유령이 나타났습니다!`,"npc");
     setChoices([{text:"공격", action:attack},{text:"도망", action:flee}]);
   } else if(event.type==="ally"){
-    monsterImg.src="images/ally.png";
+    monsterImg.src="images/ally.png"; monsterImg.classList.remove("blink");
     writeMessage("조우자를 만났습니다!","npc");
     setChoices([
       {text:"대화하기", action:()=>{
         writeMessage("페로페로 ~ 체력이 50 회복되었습니다.","npc");
         player.hp=Math.min(player.hp+50,player.maxHp); updateStats();
-        writeMessage("앗싸!","player"); nextZone();
+        writeMessage("앗싸!","player"); 
+        setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
       }},
-      {text:"그냥 지나가기", action:nextZone}
+      {text:"그냥 지나가기", action:()=>{ setChoices([{text:"다음 구역으로 가기", action:nextZone}]); } }
     ]);
   } else if(event.type==="box"){
-    monsterImg.src="images/box.png";
-    monsterImg.classList.add("blink");
+    monsterImg.src="images/box.png"; monsterImg.classList.add("blink");
     writeMessage("상자를 발견했습니다!","npc");
     setChoices([
       {text:"열기", action:()=>{
-        addItemToSlot("images/equipment.png");
         monsterImg.classList.remove("blink");
+        monsterImg.src="images/equipment.png"; // 상자 -> 장비 이미지
+        addItemToSlot("images/equipment.png");
         writeMessage("상자를 열었습니다. 상자 속에서 [무지 캡 모자]를 획득하였습니다.","npc");
-        nextZone();
+        setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
       }},
-      {text:"무시", action:nextZone}
+      {text:"무시", action:()=>{ setChoices([{text:"다음 구역으로 가기", action:nextZone}]); } }
     ]);
   }
 }
@@ -217,7 +217,7 @@ function flee(){ writeMessage("도망쳤습니다.","player"); setChoices([{text
 
 startBtn.onclick=()=>{
   gameContainer.style.display="grid"; startBtn.style.display="none";
-  if(!isBGMPlaying){ bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true; }
+  bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true;
   generateRandomEvents(); startZoneEvent();
 };
 });
