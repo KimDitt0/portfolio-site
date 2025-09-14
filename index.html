@@ -23,6 +23,19 @@ body {
   position: relative;
 }
 
+#startGameBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 15px 25px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  background: #4a90e2;
+  color: #fff;
+}
+
 .game-container {
   width: 900px;
   height: 600px;
@@ -34,6 +47,7 @@ body {
   gap: 10px;
   padding: 10px;
   box-sizing: border-box;
+  display: none; /* 초기에는 숨김 */
 }
 
 /* 캐릭터 얼굴 */
@@ -46,11 +60,7 @@ body {
   justify-content: center;
   align-items: center;
 }
-
-#character-face img {
-  width: 80px;
-  height: 80px;
-}
+#character-face img { width: 80px; height: 80px; }
 
 /* 캐릭터 스탯 */
 #character-stats {
@@ -72,145 +82,40 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: relative;
 }
-
-#monster img {
-  width: 150px;
-  height: 150px;
-  margin-bottom: 10px;
-}
-
-#monster-health {
-  width: 80%;
-  height: 15px;
-  background: #555;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-#monster-health-inner {
-  width: 100%;
-  height: 100%;
-  background: #e74c3c;
-  transition: width 0.3s;
-}
+#monster img { width: 150px; height: 150px; margin-bottom: 10px; }
+#monster-health { width: 80%; height: 15px; background: #555; border-radius: 8px; overflow: hidden; }
+#monster-health-inner { width: 100%; height: 100%; background: #e74c3c; transition: width 0.3s; }
 
 /* 아이템 박스 */
-#items {
-  grid-column: 3 / 4;
-  grid-row: 1 / 3;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 10px;
-  background: #223354;
-  border-radius: 10px;
-}
-
-#items-label {
-  font-size: 1rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-/* 아이템 슬롯 - 정사각형 유지 */
-.item-slot {
-  width: 100px;
-  height: 100px;
-  min-width: 100px;
-  min-height: 100px;
-  max-width: 100px;
-  max-height: 100px;
-  background: #334466;
-  border-radius: 15px;
-}
+#items { grid-column: 3 / 4; grid-row: 1 / 3; display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; align-items: center; padding: 10px; background: #223354; border-radius: 10px; }
+#items-label { font-size: 1rem; font-weight: bold; margin-bottom: 10px; }
+.item-slot { width: 100px; height: 100px; min-width: 100px; min-height: 100px; max-width: 100px; max-height: 100px; background: #334466; border-radius: 15px; }
 
 /* 이벤트 로그 + 선택지 */
-#event-log {
-  grid-column: 1 / 4;
-  grid-row: 3 / 4;
-  background: #1b2a41;
-  border-radius: 10px;
-  padding: 10px;
-  overflow-y: auto;
-}
+#event-log { grid-column: 1 / 4; grid-row: 3 / 4; background: #1b2a41; border-radius: 10px; padding: 10px; overflow-y: auto; }
+.message { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 5px; }
+.message img { width: 30px; height: 30px; border-radius: 50%; }
+.bubble { background: #223354; padding: 8px 12px; border-radius: 12px; max-width: 80%; animation: fadeIn 0.3s ease; }
+.message.player { flex-direction: row-reverse; }
+.message.player .bubble { background: #4a90e2; }
 
-.message {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 5px;
-}
-
-.message img {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-}
-
-.bubble {
-  background: #223354;
-  padding: 8px 12px;
-  border-radius: 12px;
-  max-width: 80%;
-  animation: fadeIn 0.3s ease;
-}
-
-.message.player {
-  flex-direction: row-reverse;
-}
-
-.message.player .bubble {
-  background: #4a90e2;
-}
-
-#choices {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-#choices button {
-  background: #4a90e2;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 12px;
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-#choices button:hover {
-  background: #357ab7;
-  transform: translateY(-2px);
-}
+#choices { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+#choices button { background: #4a90e2; border: none; border-radius: 8px; padding: 8px 12px; color: white; cursor: pointer; font-weight: bold; transition: 0.2s; }
+#choices button:hover { background: #357ab7; transform: translateY(-2px); }
 
 /* BGM 토글 아이콘 */
-#bgm-toggle {
-  position: absolute; 
-  top: 15px; 
-  right: 15px; 
-  font-size: 28px; 
-  cursor: pointer;
-}
+#bgm-toggle { position: absolute; top: 15px; right: 15px; font-size: 28px; cursor: pointer; }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 
-<div class="game-container">
-  <div id="character-face">
-    <img src="images/player.png" alt="캐릭터">
-  </div>
+<button id="startGameBtn">게임 시작</button>
+
+<div class="game-container" id="gameContainer">
+  <div id="character-face"><img src="images/player.png" alt="캐릭터"></div>
   <div id="character-stats">
     <p id="player-attack">공격: 100</p>
     <p id="player-defense">방어: 50</p>
@@ -234,7 +139,6 @@ body {
   </div>
 </div>
 
-<!-- BGM 토글 -->
 <div id="bgm-toggle">🔇</div>
 <audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
@@ -243,33 +147,25 @@ const log = document.getElementById("log");
 const choices = document.getElementById("choices");
 const bgm = document.getElementById("bgm");
 const bgmToggle = document.getElementById("bgm-toggle");
+const gameContainer = document.getElementById("gameContainer");
+const startBtn = document.getElementById("startGameBtn");
 let isBGMPlaying = false;
 
 // 플레이어 / 몬스터 정보
 let player = { hp: 300, maxHp: 350, attack: 100, defense: 50 };
-let monsterTemplate = { maxHp: 200, attack: 20 }; // 몬스터 기본 정보
+let monsterTemplate = { maxHp: 200, attack: 20 };
 let monster = { hp: monsterTemplate.maxHp };
 
 // 캐릭터/NPC 이미지
-const characters = {
-  player: "images/player.png",
-  npc: "images/npc.png"
-};
+const characters = { player: "images/player.png", npc: "images/npc.png" };
 
 // 메시지 출력
 function writeMessage(text, speaker="npc"){
   const msgDiv = document.createElement("div");
   msgDiv.className = "message " + (speaker === "player" ? "player" : "");
-  
-  const img = document.createElement("img");
-  img.src = characters[speaker];
-  
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-  bubble.innerText = text;
-  
-  msgDiv.appendChild(img);
-  msgDiv.appendChild(bubble);
+  const img = document.createElement("img"); img.src = characters[speaker];
+  const bubble = document.createElement("div"); bubble.className="bubble"; bubble.innerText=text;
+  msgDiv.appendChild(img); msgDiv.appendChild(bubble);
   log.appendChild(msgDiv);
   log.scrollTop = log.scrollHeight;
 }
@@ -280,52 +176,54 @@ function setChoices(options){
   options.forEach(opt => {
     const btn = document.createElement("button");
     btn.innerText = opt.text;
-    btn.onclick = () => {
-      playSFX('audio/click.mp3');
-      opt.action();
-    };
+    btn.onclick = () => { opt.action(); };
     choices.appendChild(btn);
   });
 }
 
-// 효과음 재생
-function playSFX(url){
-  const sfx = new Audio(url);
-  sfx.play();
-}
-
 // BGM 토글
 bgmToggle.onclick = () => {
-  if(isBGMPlaying){
-    bgm.pause();
-    bgmToggle.innerText = "🔇";
-    isBGMPlaying = false;
-  } else {
-    bgm.play().catch(() => {});
-    bgmToggle.innerText = "🔊";
-    isBGMPlaying = true;
-  }
+  if(isBGMPlaying){ bgm.pause(); bgmToggle.innerText="🔇"; isBGMPlaying=false; }
+  else { bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true; }
 };
 
-// 플레이어 체력/몬스터 체력 업데이트
+// 체력 업데이트
 function updateStats(){
   document.getElementById("player-hp").innerText = `체력: ${player.hp} / ${player.maxHp}`;
-  const monsterBar = document.getElementById("monster-health-inner");
-  monsterBar.style.width = `${(monster.hp / monsterTemplate.maxHp) * 100}%`;
+  document.getElementById("monster-health-inner").style.width = `${(monster.hp / monsterTemplate.maxHp)*100}%`;
 }
 
 // 전투 시작
 function startBattle(){
-  log.innerHTML = ""; // 이전 텍스트 제거
-  monster.hp = monsterTemplate.maxHp; // 몬스터 체력 초기화
+  log.innerHTML = ""; // 이전 로그 제거
+  monster.hp = monsterTemplate.maxHp;
   updateStats();
   writeMessage("유령이 나타났습니다!", "npc");
-  setChoices([
-    { text: "공격", action: attack },
-    { text: "도망", action: flee }
-  ]);
+  setChoices([{text:"공격", action:attack},{text:"도망", action:flee}]);
 }
 
 function attack(){
-  let damageToMonster = Math.max(player.attack - 20, 5);
-  monster.hp -= damage
+  let dmg = Math.max(player.attack - 20, 5);
+  monster.hp -= dmg;
+  if(monster.hp<0) monster.hp=0;
+  writeMessage(`몬스터에게 ${dmg} 피해!`, "player");
+  updateStats();
+  if(monster.hp===0){
+    writeMessage("몬스터를 처치했습니다!", "player");
+    setChoices([{text:"다음 전투", action:startBattle}]);
+  } else { monsterTurn(); }
+}
+
+function monsterTurn(){
+  let dmg = monsterTemplate.attack;
+  player.hp -= dmg;
+  if(player.hp<0) player.hp=0;
+  writeMessage(`몬스터가 공격! 플레이어가 ${dmg} 피해!`, "npc");
+  updateStats();
+  if(player.hp===0){ writeMessage("플레이어가 쓰러졌습니다...", "npc"); setChoices([]); }
+  else setChoices([{text:"공격", action:attack},{text:"도망", action:flee}]);
+}
+
+function flee(){
+  writeMessage("도망쳤습니다!", "player");
+  set
