@@ -30,7 +30,7 @@ body {
 #character-stats { grid-column:1/2; grid-row:3/4; background:#223354; border-radius:10px; padding:10px; font-size:0.9rem; }
 #monster { grid-column:2/3; grid-row:2/4; background:#000; border-radius:10px; display:flex; flex-direction:column; justify-content:center; align-items:center; }
 #monster img { width:250px; height:250px; margin-bottom:10px; }
-#monster-health { width:80%; height:20px; background:#555; border-radius:8px; overflow:hidden; }
+#monster-health { width:80%; height:20px; background:#555; border-radius:8px; overflow:hidden; display:none; margin-top:10px; }
 #monster-health-inner { width:100%; height:100%; background:#e74c3c; transition:width 0.3s; }
 #items { grid-column:3/4; grid-row:2/4; display:flex; flex-direction:column; gap:10px; justify-content:flex-start; align-items:center; padding:10px; background:#223354; border-radius:10px; }
 #items-label { font-size:1rem; font-weight:bold; margin-bottom:10px; }
@@ -45,6 +45,8 @@ body {
 #choices button { background:#4a90e2; border:none; border-radius:8px; padding:8px 12px; color:white; cursor:pointer; font-weight:bold; transition:0.2s; }
 #choices button:hover { background:#357ab7; transform:translateY(-2px); }
 @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
+.blink { animation: blink 0.6s ease infinite alternate; }
+@keyframes blink { from{filter: brightness(1);} to{filter: brightness(1.8);} }
 </style>
 </head>
 <body>
@@ -81,18 +83,18 @@ body {
 
 <script>
 document.addEventListener("DOMContentLoaded", ()=>{
-const log = document.getElementById("log");
-const choices = document.getElementById("choices");
-const bgm = document.getElementById("bgm");
-const bgmToggle = document.getElementById("bgm-toggle");
-const gameContainer = document.getElementById("gameContainer");
-const startBtn = document.getElementById("startGameBtn");
+const log=document.getElementById("log");
+const choices=document.getElementById("choices");
+const bgm=document.getElementById("bgm");
+const bgmToggle=document.getElementById("bgm-toggle");
+const gameContainer=document.getElementById("gameContainer");
+const startBtn=document.getElementById("startGameBtn");
 let isBGMPlaying=false;
 
 let player={hp:300,maxHp:350,attack:100,defense:50,zone:1};
 const characters={player:"images/player.png", npc:"images/npc.png"};
 const possibleEvents=["monster","ally","box"];
-let zoneEvents=[]; // 랜덤 구역 이벤트
+let zoneEvents=[];
 const zones={1:{monsterHp:200, monsterAtk:20},2:{monsterHp:300, monsterAtk:30},3:{monsterHp:400, monsterAtk:40},4:{monsterHp:0, monsterAtk:0}};
 let monster={hp:0,maxHp:0,attack:0};
 
@@ -135,7 +137,6 @@ bgmToggle.onclick=()=>{
   else { bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true; }
 };
 
-// 랜덤 이벤트 생성
 function generateRandomEvents(){
   zoneEvents=[];
   for(let i=0;i<4;i++){
@@ -153,10 +154,16 @@ function nextZone(){
 function startZoneEvent(){
   log.innerHTML=""; setZoneDisplay();
   const event=zoneEvents[player.zone-1];
-  const monsterImg=document.getElementById("monster").querySelector("img");
+  const monsterDiv=document.getElementById("monster");
+  const monsterImg=monsterDiv.querySelector("img");
+  const monsterHealthDiv=document.getElementById("monster-health");
+
+  // 몬스터 체력바 숨김 기본
+  monsterHealthDiv.style.display="none";
+
   if(event.type==="monster"){
     monster.maxHp=zones[player.zone].monsterHp; monster.hp=monster.maxHp; monster.attack=zones[player.zone].monsterAtk;
-    monsterImg.src="images/monster.png";
+    monsterImg.src="images/monster.png"; monsterHealthDiv.style.display="block";
     updateStats();
     writeMessage(`구역 ${player.zone}에서 유령이 나타났습니다!`,"npc");
     setChoices([{text:"공격", action:attack},{text:"도망", action:flee}]);
@@ -165,17 +172,22 @@ function startZoneEvent(){
     writeMessage("조우자를 만났습니다!","npc");
     setChoices([
       {text:"대화하기", action:()=>{
+        writeMessage("페로페로 ~ 체력이 50 회복되었습니다.","npc");
         player.hp=Math.min(player.hp+50,player.maxHp); updateStats();
-        writeMessage("체력이 50 회복되었습니다!","player"); nextZone();
+        writeMessage("앗싸!","player"); nextZone();
       }},
       {text:"그냥 지나가기", action:nextZone}
     ]);
   } else if(event.type==="box"){
     monsterImg.src="images/box.png";
+    monsterImg.classList.add("blink");
     writeMessage("상자를 발견했습니다!","npc");
     setChoices([
       {text:"열기", action:()=>{
-        addItemToSlot("images/equipment.png"); nextZone();
+        addItemToSlot("images/equipment.png");
+        monsterImg.classList.remove("blink");
+        writeMessage("상자를 열었습니다. 상자 속에서 [무지 캡 모자]를 획득하였습니다.","npc");
+        nextZone();
       }},
       {text:"무시", action:nextZone}
     ]);
