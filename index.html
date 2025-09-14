@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
             eventImg.src="images/monster.png";
             monsterHealthDiv.style.display="block";
             updateStats();
-            writeMessage(`구역 ${player.zone}에서 유령이 나타났습니다!`,"npc");
+            writeMessage(`구역 ${player.zone}에서 쿠로가 나타났습니다!`,"npc");
             setChoices([{text:"공격",action:attack},{text:"도망",action:flee}]);
         } else if(event.type==="ally"){
             eventImg.src="images/ally.png";
@@ -209,7 +209,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
                 }},
                 {text:"그냥 지나가기", action:()=>{
                     writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-                    setTimeout(nextZone,500);
+                    setTimeout(nextZone,800);
                 }}
             ]);
         } else if(event.type==="box"){
@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
                 }},
                 {text:"무시", action:()=>{ 
                     writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-                    setTimeout(nextZone,500);
+                    setTimeout(nextZone,800);
                 }}
             ]);
         }
@@ -237,14 +237,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
         if(player.hp<=0) return;
         let dmg=Math.max(player.attack-20,5);
         monster.hp-=dmg; if(monster.hp<0) monster.hp=0;
-        writeMessage(`유령에게 ${dmg} 피해를 주었습니다!`,"player");
+        writeMessage(`쿠로에게 ${dmg} 피해를 주었습니다!`,"player");
         updateStats();
         if(monster.hp<=0){
-            writeMessage("유령을 처치했습니다!","npc");
+            writeMessage("쿠로를 처치했습니다!","npc");
             setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
         } else {
             player.hp=Math.max(player.hp-monster.attack,0);
-            writeMessage(`유령에게 ${monster.attack} 피해를 받았습니다!`,"npc");
+            writeMessage(`쿠로에게 ${monster.attack} 피해를 받았습니다!`,"npc");
             updateStats();
             if(player.hp<=0){ triggerFail(); }
         }
