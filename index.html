@@ -21,10 +21,9 @@ body {
   position:absolute; top:0; left:0; width:100%; height:100%;
   display:flex; flex-direction:column; justify-content:center; align-items:center;
   text-align:center; transition: opacity 1s;
-  background: #0d1b2a;
 }
 #startScreen img { width:250px; margin-bottom:20px; }
-#startScreen h1 { margin:10px 0; font-size:2.5rem; }
+#startScreen h1 { margin:10px 0; font-size:2rem; }
 #startScreen button { padding:15px 30px; font-size:1.2rem; cursor:pointer; border:none; border-radius:10px; background:#4a90e2; color:#fff; }
 
 /* BGM toggle */
@@ -40,18 +39,18 @@ body {
   grid-template-columns:180px 1fr 180px;
   grid-template-rows:50px 220px 1fr 180px;
   gap:10px; padding:10px; box-sizing:border-box;
-  transition: opacity 0.5s;
+  transition: opacity 1s;
 }
 #zone-display { grid-column:1/4; grid-row:1/2; text-align:center; font-weight:bold; font-size:2rem; }
 
 /* 캐릭터 */
 #character-face { grid-column:1/2; grid-row:2/3; background:#1b2a41; border-radius:10px; display:flex; justify-content:center; align-items:center; }
 #character-face img { width:150px; height:150px; }
-#character-stats { grid-column:1/2; grid-row:3/4; background:#223354; border-radius:10px; padding:10px; font-size:1rem; }
+#character-stats { grid-column:1/2; grid-row:3/4; background:#223354; border-radius:10px; padding:10px; font-size:0.9rem; }
 
 /* 중앙 이벤트 박스 */
-#event-box { grid-column:2/3; grid-row:2/4; position:relative; background-image: url('images/background.png'); background-size:cover; background-position:center; border-radius:10px; display:flex; justify-content:center; align-items:center; flex-direction:column; }
-#event-box img { max-width:80%; max-height:80%; transition: 0.5s; }
+#event-box { grid-column:2/3; grid-row:2/4; position:relative; background-image: url('images/background.png'); background-size:cover; background-position:center; border-radius:10px; display:flex; justify-content:center; align-items:center; flex-direction:column; transition:opacity 0.5s; }
+#event-box img { max-width:80%; max-height:80%; }
 
 /* 몬스터 체력바 */
 #monster-health { width:80%; height:20px; background:#555; border-radius:8px; overflow:hidden; display:none; margin-top:10px; }
@@ -73,7 +72,6 @@ body {
 #choices button { background:#4a90e2; border:none; border-radius:8px; padding:8px 12px; color:white; cursor:pointer; font-weight:bold; transition:0.2s; }
 #choices button:hover { background:#357ab7; transform:translateY(-2px); }
 
-/* 효과 */
 @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
 .glow { animation: glow 0.8s ease infinite; }
 @keyframes glow { 0% {filter: brightness(1);} 50% {filter: brightness(2);} 100% {filter: brightness(1);} }
@@ -119,23 +117,24 @@ body {
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", ()=>{
 const startScreen=document.getElementById("startScreen");
 const startBtn=document.getElementById("startGameBtn");
 const gameContainer=document.getElementById("gameContainer");
 const bgm=document.getElementById("bgm");
 const bgmToggle=document.getElementById("bgm-toggle");
+let isBGMPlaying=false;
 const log=document.getElementById("log");
 const choices=document.getElementById("choices");
-const eventImg=document.getElementById("event-img");
+const eventBoxImg=document.getElementById("event-img");
 const monsterHealthDiv=document.getElementById("monster-health");
 const monsterHealthInner=document.getElementById("monster-health-inner");
-let isBGMPlaying=false;
 
 let player={hp:300,maxHp:350,attack:100,defense:50,zone:1};
-const characters={player:"images/player.png",npc:"images/npc.png"};
+const characters={player:"images/player.png", npc:"images/npc.png"};
 const possibleEvents=["monster","ally","box"];
 let zoneEvents=[];
-const zones={1:{monsterHp:200,monsterAtk:20},2:{monsterHp:250,monsterAtk:25},3:{monsterHp:300,monsterAtk:30},4:{monsterHp:0,monsterAtk:0},5:{monsterHp:350,monsterAtk:35},6:{monsterHp:0,monsterAtk:0},7:{monsterHp:400,monsterAtk:40},8:{monsterHp:0,monsterAtk:0},9:{monsterHp:450,monsterAtk:45},10:{monsterHp:500,monsterAtk:50}};
+const zones={1:{monsterHp:200,monsterAtk:20},2:{monsterHp:300,monsterAtk:30},3:{monsterHp:400,monsterAtk:40},4:{monsterHp:0,monsterAtk:0},5:{monsterHp:500,monsterAtk:50},6:{monsterHp:0,monsterAtk:0},7:{monsterHp:600,monsterAtk:60},8:{monsterHp:0,monsterAtk:0},9:{monsterHp:700,monsterAtk:70},10:{monsterHp:0,monsterAtk:0}};
 let monster={hp:0,maxHp:0,attack:0};
 
 function writeMessage(text,speaker="npc",imgSrc=null){
@@ -153,36 +152,31 @@ function setChoices(options){
   options.forEach(opt=>{
     const btn=document.createElement("button");
     btn.innerText=opt.text;
-    btn.onclick=()=>opt.action();
+    btn.onclick=()=>{ opt.action(); };
     choices.appendChild(btn);
   });
 }
 
 function updateStats(){
   document.getElementById("player-hp").innerText=`체력: ${player.hp} / ${player.maxHp}`;
-  monsterHealthInner.style.width=monster.maxHp? (monster.hp/monster.maxHp*100)+"%" : "0%";
-  document.getElementById("player-attack").innerText=`공격: ${player.attack}`;
+  monsterHealthInner.style.width=monster.maxHp? (monster.hp/monster.maxHp*100)+"%":"0%";
 }
 
 function addItemToSlot(imgSrc){
   const itemSlots=document.querySelectorAll(".item-slot");
-  for(const slot of itemSlots){
-    if(!slot.innerHTML){
-      const img=document.createElement("img"); img.src=imgSrc; img.style.width="80px"; img.style.height="80px"; slot.appendChild(img); break;
-    }
+  for(const slot of itemSlots){ 
+    if(!slot.innerHTML){ 
+      const img=document.createElement("img"); img.src=imgSrc; img.style.width="80px"; img.style.height="80px"; slot.appendChild(img); break; 
+    } 
   }
 }
 
 function setZoneDisplay(){ document.getElementById("zone-display").innerText=`현재 위치: ${player.zone}구역`; }
 
-function fadeTransition(callback){
-  gameContainer.style.transition="opacity 0.5s";
-  gameContainer.style.opacity=0;
-  setTimeout(()=>{
-    callback();
-    gameContainer.style.opacity=1;
-  },500);
-}
+bgmToggle.onclick=()=>{
+  if(isBGMPlaying){ bgm.pause(); bgmToggle.innerText="🔇"; isBGMPlaying=false; } 
+  else { bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true; }
+};
 
 function generateRandomEvents(){
   zoneEvents=[];
@@ -192,49 +186,35 @@ function generateRandomEvents(){
   }
 }
 
-function nextZone(){
-  fadeTransition(()=>{
-    player.zone++;
-    if(player.zone>zoneEvents.length){
-      writeMessage("모든 구역 클리어!","npc");
-      player.zone=1;
-    }
-    startZoneEvent();
-  });
+function fadeEventBox(callback){
+  eventBoxImg.style.opacity=0;
+  setTimeout(()=>{ callback(); eventBoxImg.style.opacity=1; },500);
 }
 
-function acquireItem(itemImg,statsEffect){
-  addItemToSlot(itemImg);
-  eventImg.classList.add("glow");
-  setTimeout(()=>eventImg.classList.remove("glow"),800);
-  if(statsEffect.attack) player.attack += statsEffect.attack;
-  if(statsEffect.maxHp){
-    player.maxHp += statsEffect.maxHp;
-    player.hp += statsEffect.maxHp;
-  }
-  updateStats();
-  writeMessage("상자를 열었습니다. [무지 캡 모자] 획득! 공격력 +20, 최대 체력 +50!","npc");
+function nextZone(){ 
+  player.zone++; 
+  if(player.zone>zoneEvents.length){ writeMessage("모든 구역 클리어!","npc"); player.zone=1; } 
+  startZoneEvent(); 
 }
 
 function startZoneEvent(){
-  log.innerHTML="";
-  setZoneDisplay();
+  log.innerHTML=""; setZoneDisplay();
   const event=zoneEvents[player.zone-1];
   monsterHealthDiv.style.display="none";
   if(event.type==="monster"){
     monster.maxHp=zones[player.zone].monsterHp; monster.hp=monster.maxHp; monster.attack=zones[player.zone].monsterAtk;
-    eventImg.src="images/monster.png"; monsterHealthDiv.style.display="block";
+    eventBoxImg.src="images/monster.png"; monsterHealthDiv.style.display="block";
     updateStats();
     writeMessage(`구역 ${player.zone}에서 유령이 나타났습니다!`,"npc");
     setChoices([{text:"공격", action:attack},{text:"도망", action:flee}]);
   } else if(event.type==="ally"){
-    eventImg.src="images/ally.png"; eventImg.classList.remove("blink");
+    eventBoxImg.src="images/ally.png";
     writeMessage("조우자를 만났습니다!","npc");
     setChoices([
       {text:"대화하기", action:()=>{
         writeMessage("페로페로 ~ 체력이 50 회복되었습니다.","npc");
         player.hp=Math.min(player.hp+50,player.maxHp); updateStats();
-        writeMessage("앗싸!","player");
+        writeMessage("앗싸!","player"); 
         setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
       }},
       {text:"그냥 지나가기", action:()=>{
@@ -243,14 +223,18 @@ function startZoneEvent(){
       }}
     ]);
   } else if(event.type==="box"){
-    eventImg.src="images/box.png"; eventImg.classList.add("blink");
+    eventBoxImg.src="images/box.png"; eventBoxImg.classList.add("glow");
     writeMessage("상자를 발견했습니다!","npc");
     setChoices([
       {text:"열기", action:()=>{
-        eventImg.classList.remove("blink");
-        eventImg.src="images/equipment.png";
-        acquireItem("images/equipment.png",{attack:20,maxHp:50});
-        setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
+        fadeEventBox(()=>{
+          eventBoxImg.classList.remove("glow");
+          eventBoxImg.src="images/equipment.png";
+          addItemToSlot("images/equipment.png");
+          player.attack+=20; player.maxHp+=30; player.hp+=30; updateStats();
+          writeMessage("상자를 열었습니다. 상자 속에서 [무지 캡 모자]를 획득하였습니다.","npc");
+          setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
+        });
       }},
       {text:"무시", action:()=>{
         writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
@@ -271,9 +255,9 @@ function attack(){
   } else {
     player.hp-=monster.attack; if(player.hp<0) player.hp=0;
     writeMessage(`유령에게 ${monster.attack} 피해를 받았습니다!`,"npc"); updateStats();
-    if(player.hp<=0){
-      writeMessage("체력이 0이 되어 패배했습니다. 1구역으로 이동합니다.","npc");
-      player.hp=player.maxHp; player.zone=1; startZoneEvent();
+    if(player.hp<=0){ 
+      writeMessage("체력이 0이 되어 패배했습니다. 1구역으로 이동합니다.","npc"); 
+      player.hp=player.maxHp; player.zone=1; startZoneEvent(); 
     }
   }
 }
@@ -286,17 +270,14 @@ startBtn.onclick=()=>{
     startScreen.style.display="none";
     gameContainer.style.display="grid";
     gameContainer.style.opacity=0;
-    setTimeout(()=>gameContainer.style.opacity=1,50);
+    setTimeout(()=> gameContainer.style.opacity=1,50);
+    bgm.play().catch(()=>{}); isBGMPlaying=true; bgmToggle.innerText="🔊";
     generateRandomEvents();
     startZoneEvent();
-    bgm.play().catch(()=>{}); isBGMPlaying=true; bgmToggle.innerText="🔊";
-  },500);
+  },1000);
 };
-
-bgmToggle.onclick=()=>{
-  if(isBGMPlaying){ bgm.pause(); bgmToggle.innerText="🔇"; isBGMPlaying=false; }
-  else{ bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true; }
-};
+});
 </script>
+
 </body>
 </html>
