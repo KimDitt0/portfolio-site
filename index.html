@@ -12,9 +12,9 @@ body {
     font-family: 'Do Hyeon', sans-serif;
     background: #0d1b2a;
     color: #fff;
+    display:flex; justify-content:center; align-items:center;
     height:100vh;
     overflow:hidden;
-    position:relative;
 }
 
 /* --- 시작 씬 --- */
@@ -23,14 +23,14 @@ body {
     display:flex; flex-direction:column; justify-content:center; align-items:center;
     text-align:center; transition: opacity 1s;
     background: linear-gradient(135deg,#0d1b2a,#1b263b);
-    z-index:10;
 }
 #startScreen img { width:250px; margin-bottom:20px; }
 #startScreen h1 { margin:10px 0; font-size:2rem; }
 #startScreen button {
     padding:15px 30px; font-size:1.2rem;
     cursor:pointer; border:none; border-radius:10px;
-    background:#4a90e2; color:#fff; transition:0.3s;
+    background:#4a90e2; color:#fff;
+    transition:0.3s;
 }
 #startScreen button:hover { background:#357ab7; }
 
@@ -42,8 +42,6 @@ body {
 /* --- 게임 씬 --- */
 #gameContainer {
     display:none;
-    position:absolute; top:50%; left:50%;
-    transform: translate(-50%,-50%);
     width:1000px; height:650px;
     background: rgba(20,30,50,0.9);
     border-radius:20px;
@@ -53,7 +51,6 @@ body {
     gap:10px; padding:10px; box-sizing:border-box;
     transition: opacity 1s;
 }
-
 #zone-display { grid-column:1/4; grid-row:1/2; text-align:center; font-weight:bold; font-size:2rem; }
 
 /* 캐릭터 */
@@ -93,6 +90,7 @@ body {
 @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
 .glow { animation: glow 0.8s ease infinite; }
 @keyframes glow { 0% {filter: brightness(1);} 50% {filter: brightness(2);} 100% {filter: brightness(1);} }
+
 </style>
 </head>
 <body>
@@ -109,13 +107,13 @@ body {
 <audio id="bgm" src="audio/bgm.mp3" loop></audio>
 
 <!-- 게임 씬 -->
-<div id="gameContainer">
+<div class="game-container" id="gameContainer">
   <div id="zone-display">현재 위치: 1구역</div>
   <div id="character-face"><img src="images/player.png" alt="캐릭터"></div>
   <div id="character-stats">
     <p id="player-attack">공격: 100</p>
     <p id="player-defense">방어: 50</p>
-    <p id="player-hp">체력: 300 / 350</p>
+    <p id="player-hp">체력: 300</p>
     <p>상태: 🙂</p>
   </div>
   <div id="event-box">
@@ -146,12 +144,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     const log = document.getElementById("log");
     const choices = document.getElementById("choices");
-    const eventImg = document.getElementById("event-img");
-    const monsterHealthDiv = document.getElementById("monster-health");
-    const monsterHealthInner = document.getElementById("monster-health-inner");
-
     const characters = { player:"images/player.png", npc:"images/npc.png" };
-
     let player = { hp:300, maxHp:350, attack:100, defense:50, zone:1 };
     let monster = { hp:0, maxHp:0, attack:0 };
     const possibleEvents = ["monster","ally","box"];
@@ -190,8 +183,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
     }
 
     function updateStats(){
-        document.getElementById("player-hp").innerText=`체력: ${player.hp} / ${player.maxHp}`;
-        monsterHealthInner.style.width = monster.maxHp ? (monster.hp/monster.maxHp*100)+"%" : "0%";
+        document.getElementById("player-hp").innerText = `체력: ${player.hp}`;
+        document.getElementById("player-attack").innerText = `공격: ${player.attack}`;
+        document.getElementById("player-defense").innerText = `방어: ${player.defense}`;
+        const healthInner = document.getElementById("monster-health-inner");
+        healthInner.style.width = monster.maxHp ? (monster.hp / monster.maxHp * 100) + "%" : "0%";
     }
 
     function setZoneDisplay(){ document.getElementById("zone-display").innerText=`현재 위치: ${player.zone}구역`; }
@@ -224,8 +220,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
     function startZoneEvent(){
         log.innerHTML=""; setZoneDisplay();
         const event=zoneEvents[player.zone-1];
+        const eventImg = document.getElementById("event-img");
+        const monsterHealthDiv = document.getElementById("monster-health");
         monsterHealthDiv.style.display="none";
-        eventImg.src=""; eventImg.classList.remove("glow");
 
         if(event.type==="monster"){
             monster.maxHp=zones[player.zone].monsterHp;
@@ -241,11 +238,15 @@ document.addEventListener("DOMContentLoaded", ()=>{
             writeMessage("조우자를 만났습니다!","npc");
             setChoices([
                 {text:"대화하기", action:()=>{
-                    writeMessage("체력 50 회복!","npc");
+                    writeMessage("페로페로 ~ 체력이 50 회복되었습니다.","npc");
                     player.hp=Math.min(player.hp+50,player.maxHp); updateStats();
+                    writeMessage("앗싸!","player");
                     setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
                 }},
-                {text:"그냥 지나가기", action:()=>{ setChoices([{text:"다음 구역으로 가기", action:nextZone}]); }}
+                {text:"그냥 지나가기", action:()=>{
+                    writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
+                    setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
+                }}
             ]);
         } else if(event.type==="box"){
             eventImg.src="images/box.png";
@@ -256,11 +257,17 @@ document.addEventListener("DOMContentLoaded", ()=>{
                     eventImg.classList.remove("glow");
                     eventImg.src="images/equipment.png";
                     addItemToSlot("images/equipment.png");
-                    writeMessage("상자에서 장비 획득! 공격력+20, 체력+20","npc");
-                    player.attack+=20; player.maxHp+=20; player.hp+=20; updateStats();
+                    writeMessage("상자를 열었습니다. [무지 캡 모자]를 획득했습니다.","npc");
+                    player.attack += 20;
+                    player.maxHp += 20;
+                    player.hp += 20;
+                    updateStats();
                     setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
                 }},
-                {text:"무시", action:()=>{ setChoices([{text:"다음 구역으로 가기", action:nextZone}]); }}
+                {text:"무시", action:()=>{
+                    writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
+                    setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
+                }}
             ]);
         }
     }
@@ -277,13 +284,15 @@ document.addEventListener("DOMContentLoaded", ()=>{
         } else {
             player.hp-=monster.attack; if(player.hp<0) player.hp=0;
             writeMessage(`유령에게 ${monster.attack} 피해를 받았습니다!`,"npc"); updateStats();
-            if(player.hp<=0){ writeMessage("패배! 1구역으로 이동합니다.","npc"); player.hp=player.maxHp; player.zone=1; startZoneEvent(); }
+            if(player.hp<=0){ 
+                writeMessage("체력이 0이 되어 패배했습니다. 1구역으로 이동합니다.","npc"); 
+                player.hp=player.maxHp; player.zone=1; startZoneEvent(); 
+            }
         }
     }
 
     function flee(){ writeMessage("도망쳤습니다.","player"); nextZone(); }
 
-    // --- 시작 버튼 클릭 ---
     startBtn.onclick=()=>{
         startScreen.style.opacity=0;
         setTimeout(()=>{
@@ -298,11 +307,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
         },500);
     };
 
-    // --- BGM 토글 ---
     bgmToggle.onclick=()=>{
         if(isBGMPlaying){ bgm.pause(); bgmToggle.innerText="🔇"; isBGMPlaying=false; }
         else{ bgm.play().catch(()=>{}); bgmToggle.innerText="🔊"; isBGMPlaying=true; }
     };
+
 });
 </script>
 </body>
