@@ -7,52 +7,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap" rel="stylesheet">
 <style>
-body {
-    margin:0; padding:0;
-    font-family: 'Do Hyeon', sans-serif;
-    background: #0d1b2a;
-    color: #fff;
-    height:100vh;
-    overflow:hidden;
-    position:relative;
-}
+body { margin:0; padding:0; font-family:'Do Hyeon', sans-serif; background:#0d1b2a; color:#fff; height:100vh; overflow:hidden; position:relative; }
 
 /* --- 시작 씬 --- */
-#startScreen {
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    display:flex; flex-direction:column; justify-content:center; align-items:center;
-    text-align:center; transition: opacity 1s;
-    background: linear-gradient(135deg,#0d1b2a,#1b263b);
-    z-index:10;
-}
+#startScreen { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; transition:opacity 1s; background:linear-gradient(135deg,#0d1b2a,#1b263b); z-index:10; }
 #startScreen img { width:250px; margin-bottom:20px; }
 #startScreen h1 { margin:10px 0; font-size:2rem; }
-#startScreen button {
-    padding:15px 30px; font-size:1.2rem;
-    cursor:pointer; border:none; border-radius:10px;
-    background:#4a90e2; color:#fff; transition:0.3s;
-}
+#startScreen button { padding:15px 30px; font-size:1.2rem; cursor:pointer; border:none; border-radius:10px; background:#4a90e2; color:#fff; transition:0.3s; }
 #startScreen button:hover { background:#357ab7; }
 
 /* BGM toggle */
-#bgm-toggle {
-    position:absolute; top:15px; right:15px; font-size:28px; cursor:pointer; z-index:1000;
-}
+#bgm-toggle { position:absolute; top:15px; right:15px; font-size:28px; cursor:pointer; z-index:1000; }
 
 /* --- 게임 씬 --- */
-#gameContainer {
-    display:none;
-    position:absolute; top:50%; left:50%;
-    transform: translate(-50%,-50%);
-    width:1000px; height:650px;
-    background: rgba(20,30,50,0.9);
-    border-radius:20px;
-    display:grid;
-    grid-template-columns:180px 1fr 180px;
-    grid-template-rows:50px 220px 1fr 180px;
-    gap:10px; padding:10px; box-sizing:border-box;
-    transition: opacity 1s;
-}
+#gameContainer { display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:1000px; height:650px; background: rgba(20,30,50,0.9); border-radius:20px; display:grid; grid-template-columns:180px 1fr 180px; grid-template-rows:50px 220px 1fr 180px; gap:10px; padding:10px; box-sizing:border-box; transition:opacity 1s; }
 
 #zone-display { grid-column:1/4; grid-row:1/2; text-align:center; font-weight:bold; font-size:2rem; }
 
@@ -62,12 +30,7 @@ body {
 #character-stats { grid-column:1/2; grid-row:3/4; background:#223354; border-radius:10px; padding:10px; font-size:0.9rem; }
 
 /* 중앙 이벤트 박스 */
-#event-box { 
-    grid-column:2/3; grid-row:2/4; position:relative;
-    background-image: url('images/background.png'); 
-    background-size:cover; background-position:center; 
-    border-radius:10px; display:flex; justify-content:center; align-items:center; flex-direction:column; 
-}
+#event-box { grid-column:2/3; grid-row:2/4; position:relative; background-image: url('images/background.png'); background-size:cover; background-position:center; border-radius:10px; display:flex; justify-content:center; align-items:center; flex-direction:column; }
 #event-box img { max-width:80%; max-height:80%; }
 
 /* 몬스터 체력바 */
@@ -91,18 +54,10 @@ body {
 #choices button:hover { background:#357ab7; transform:translateY(-2px); }
 
 /* 팝업 */
-#popup {
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    background: rgba(0,0,0,0.9); border-radius:20px;
-    display:none; flex-direction:column; align-items:center; justify-content:center;
-    padding:20px; color:#fff; text-align:center; z-index:50;
-}
+#popup { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background: rgba(0,0,0,0.9); border-radius:20px; display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px; color:#fff; text-align:center; z-index:50; }
 #popup img { max-width:300px; margin-bottom:20px; }
-#popup button {
-    background:#4a90e2; color:#fff; border:none; border-radius:10px;
-    padding:10px 20px; font-size:1rem; cursor:pointer; transition:0.3s;
-}
-#popup button:hover { background:#357ab7; }
+#popup button { background:#4a90e2; color:#fff; border:none; border-radius:10px; padding:10px 20px; font-size:1rem; cursor:pointer; transition:0.3s; }
+#popup button:hover { transform:translateY(-2px); }
 
 @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
 .glow { animation: glow 0.8s ease infinite; }
@@ -158,44 +113,28 @@ body {
 
 <script>
 document.addEventListener("DOMContentLoaded", ()=>{
-    const startScreen = document.getElementById("startScreen");
-    const startBtn = document.getElementById("startGameBtn");
-    const gameContainer = document.getElementById("gameContainer");
-    const bgm = document.getElementById("bgm");
-    const bgmToggle = document.getElementById("bgm-toggle");
-    const log = document.getElementById("log");
-    const choices = document.getElementById("choices");
-    const eventImg = document.getElementById("event-img");
-    const monsterHealthDiv = document.getElementById("monster-health");
-    const monsterHealthInner = document.getElementById("monster-health-inner");
-    const popup = document.getElementById("popup");
-    const popupImg = document.getElementById("popup-img");
-    const popupText = document.getElementById("popup-text");
-    const popupBtn = document.getElementById("popup-btn");
+    const startScreen=document.getElementById("startScreen");
+    const startBtn=document.getElementById("startGameBtn");
+    const gameContainer=document.getElementById("gameContainer");
+    const bgm=document.getElementById("bgm");
+    const bgmToggle=document.getElementById("bgm-toggle");
+    const log=document.getElementById("log");
+    const choices=document.getElementById("choices");
+    const eventImg=document.getElementById("event-img");
+    const monsterHealthDiv=document.getElementById("monster-health");
+    const monsterHealthInner=document.getElementById("monster-health-inner");
+    const popup=document.getElementById("popup");
+    const popupImg=document.getElementById("popup-img");
+    const popupText=document.getElementById("popup-text");
+    const popupBtn=document.getElementById("popup-btn");
 
     let isBGMPlaying=false;
-
     const characters={player:"images/player.png",npc:"images/npc.png"};
-
     let player, monster, zoneEvents;
     const possibleEvents=["monster","ally","box"];
+    const zones={1:{monsterHp:200,monsterAtk:20},2:{monsterHp:300,monsterAtk:30},3:{monsterHp:400,monsterAtk:40},4:{monsterHp:500,monsterAtk:50},5:{monsterHp:350,monsterAtk:35},6:{monsterHp:250,monsterAtk:25},7:{monsterHp:350,monsterAtk:35},8:{monsterHp:400,monsterAtk:40},9:{monsterHp:450,monsterAtk:45},10:{monsterHp:500,monsterAtk:50}};
 
-    const zones={
-        1:{monsterHp:200, monsterAtk:20},2:{monsterHp:300, monsterAtk:30},
-        3:{monsterHp:400, monsterAtk:40},4:{monsterHp:500, monsterAtk:50},
-        5:{monsterHp:350, monsterAtk:35},6:{monsterHp:250, monsterAtk:25},
-        7:{monsterHp:350, monsterAtk:35},8:{monsterHp:400, monsterAtk:40},
-        9:{monsterHp:450, monsterAtk:45},10:{monsterHp:500, monsterAtk:50}
-    };
-
-    function initGame(){
-        player={hp:300, maxHp:350, attack:100, defense:50, zone:1};
-        monster={hp:0,maxHp:0,attack:0};
-        zoneEvents=[];
-        generateRandomEvents();
-        updateStats();
-        setZoneDisplay();
-    }
+    function initGame(){ resetGame(); }
 
     function writeMessage(text,speaker="npc",imgSrc=null){
         const msgDiv=document.createElement("div");
@@ -226,30 +165,32 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     function addItemToSlot(imgSrc){
         const slots=document.querySelectorAll(".item-slot");
-        for(const slot of slots){
-            if(!slot.innerHTML){
-                const img=document.createElement("img"); img.src=imgSrc;
-                img.style.width="80px"; img.style.height="80px";
-                slot.appendChild(img); break;
-            }
-        }
+        for(const slot of slots){ if(!slot.innerHTML){ const img=document.createElement("img"); img.src=imgSrc; img.style.width="80px"; img.style.height="80px"; slot.appendChild(img); break; } }
     }
 
     function generateRandomEvents(){
         zoneEvents=[];
-        for(let i=0;i<10;i++){
-            const randIndex=Math.floor(Math.random()*possibleEvents.length);
-            zoneEvents.push({type:possibleEvents[randIndex]});
-        }
+        for(let i=0;i<10;i++){ zoneEvents.push({type:possibleEvents[Math.floor(Math.random()*possibleEvents.length)]}); }
     }
 
-    function nextZone(){
-        player.hp=Math.max(player.hp-5,0); // 구역 이동시 체력 5 감소
-        if(player.hp<=0){ triggerFail(); return; }
+    function resetGame(){
+        player={hp:300,maxHp:350,attack:100,defense:50,zone:1};
+        monster={hp:0,maxHp:0,attack:0};
+        clearItems();
+        log.innerHTML="";
+        generateRandomEvents();
+        setZoneDisplay();
+        updateStats();
+        startZoneEvent();
+    }
 
+    function clearItems(){ document.querySelectorAll(".item-slot").forEach(slot=>slot.innerHTML=""); }
+
+    function nextZone(){
+        player.hp=Math.max(player.hp-5,0);
+        if(player.hp<=0){ triggerFail(); return; }
         player.zone++;
         if(player.zone>10){ triggerClear(); return; }
-
         startZoneEvent();
     }
 
@@ -314,7 +255,8 @@ document.addEventListener("DOMContentLoaded", ()=>{
             setChoices([{text:"다음 구역으로 가기", action:nextZone}]);
         } else {
             player.hp=Math.max(player.hp-monster.attack,0);
-            writeMessage(`유령에게 ${monster.attack} 피해를 받았습니다!`,"npc"); updateStats();
+            writeMessage(`유령에게 ${monster.attack} 피해를 받았습니다!`,"npc");
+            updateStats();
             if(player.hp<=0){ triggerFail(); }
         }
     }
@@ -323,27 +265,25 @@ document.addEventListener("DOMContentLoaded", ()=>{
         writeMessage("도망쳤습니다.","player");
         player.hp=Math.max(player.hp-5,0);
         if(player.hp<=0){ triggerFail(); return; }
-        startZoneEvent(); // 도망가면 같은 구역에서 새 이벤트 발생
+        startZoneEvent();
     }
 
     function triggerClear(){
         popup.style.display="flex";
         popupImg.src="images/clear.gif";
         popupText.innerText="클리어 하셨습니다! 축하드려요 선생님! 🎉";
-        popupBtn.onclick=()=>{
-            popup.style.display="none";
-            startZoneEvent();
-        };
+        popupBtn.innerText="다시 하기!";
+        popupBtn.style.background="#4a90e2";
+        popupBtn.onclick=()=>{ popup.style.display="none"; resetGame(); };
     }
 
     function triggerFail(){
         popup.style.display="flex";
         popupImg.src="images/fail.gif";
         popupText.innerText="패배해버렸어요 선생님.. 🥺";
-        popupBtn.onclick=()=>{
-            popup.style.display="none";
-            startZoneEvent();
-        };
+        popupBtn.innerText="다시 하기!";
+        popupBtn.style.background="#e74c3c";
+        popupBtn.onclick=()=>{ popup.style.display="none"; resetGame(); };
     }
 
     startBtn.onclick=()=>{
@@ -356,7 +296,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
             bgm.play().catch(()=>{});
             bgmToggle.innerText="🔊"; isBGMPlaying=true;
             initGame();
-            startZoneEvent();
         },500);
     };
 
