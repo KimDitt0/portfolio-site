@@ -129,7 +129,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
         options.forEach(opt=>{
             const btn=document.createElement("button");
             btn.innerText=opt.text;
-            btn.onclick=()=>{ clickSound.play(); opt.action(); };
+            btn.onclick=()=>{
+                clickSound.volume = 0.2; // 클릭 사운드 볼륨
+                clickSound.play();
+                opt.action();
+            };
             choices.appendChild(btn);
         });
     }
@@ -205,7 +209,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
                 }},
                 {text:"그냥 지나가기", action:()=>{
                     writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-                    nextZone();
+                    setTimeout(nextZone,500);
                 }}
             ]);
         } else if(event.type==="box"){
@@ -223,7 +227,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
                 }},
                 {text:"무시", action:()=>{ 
                     writeMessage("아쉬움을 뒤로 하고 다음 구역으로 이동하였습니다.","npc");
-                    nextZone();
+                    setTimeout(nextZone,500);
                 }}
             ]);
         }
@@ -280,7 +284,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
             gameContainer.style.display="grid";
             gameContainer.style.opacity=0;
             setTimeout(()=>gameContainer.style.opacity=1,50);
-            bgm.volum = 0.5;
+            bgm.volume = 0.5; // BGM 볼륨 50%
             bgm.play().catch(()=>{});
             bgmToggle.innerText="🔊"; isBGMPlaying=true;
             initGame();
