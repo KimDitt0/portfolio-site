@@ -69,21 +69,57 @@ body {
   background: #000;
   border-radius: 10px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 
-/* 아이템 (사용 X, 보여주기만) */
+#monster img {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 10px;
+}
+
+#monster-health {
+  width: 80%;
+  height: 15px;
+  background: #555;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#monster-health-inner {
+  width: 100%;
+  height: 100%;
+  background: #e74c3c;
+  transition: width 0.3s;
+}
+
+/* 아이템 슬롯 */
 #items {
   grid-column: 3 / 4;
   grid-row: 1 / 3;
-  background: #223354;
-  border-radius: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  justify-content: flex-start;
+  align-items: center;
   padding: 10px;
-  font-size: 0.85rem;
+  background: #223354;
+  border-radius: 10px;
+}
+
+.item-slot {
+  width: 100px;
+  height: 100px;
+  background: #334466;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.9rem;
+  color: white;
 }
 
 /* 이벤트 로그 + 선택지 */
@@ -170,19 +206,20 @@ body {
     <img src="images/player.png" alt="캐릭터">
   </div>
   <div id="character-stats">
-    <p>공격: 100</p>
-    <p>방어: 50</p>
-    <p>체력: 300 / 350</p>
+    <p id="player-attack">공격: 100</p>
+    <p id="player-defense">방어: 50</p>
+    <p id="player-hp">체력: 300 / 350</p>
     <p>상태: 🙂</p>
   </div>
   <div id="monster">
     <img src="images/monster.png" alt="몬스터">
+    <div id="monster-health"><div id="monster-health-inner"></div></div>
   </div>
   <div id="items">
-    <div>아이템1</div>
-    <div>아이템2</div>
-    <div>아이템3</div>
-    <div>아이템4</div>
+    <div class="item-slot">아이템1</div>
+    <div class="item-slot">아이템2</div>
+    <div class="item-slot">아이템3</div>
+    <div class="item-slot">아이템4</div>
   </div>
   <div id="event-log">
     <div id="log"></div>
@@ -200,6 +237,10 @@ const choices = document.getElementById("choices");
 const bgm = document.getElementById("bgm");
 const bgmToggle = document.getElementById("bgm-toggle");
 let isBGMPlaying = false;
+
+// 플레이어 / 몬스터 정보
+let player = { hp: 300, maxHp: 350, attack: 100, defense: 50 };
+let monster = { hp: 200, maxHp: 200 };
 
 // 캐릭터/NPC 이미지
 const characters = {
@@ -258,23 +299,69 @@ bgmToggle.onclick = () => {
   }
 };
 
-// 게임 로직 예시
-function startGame(){
-  writeMessage("유령이 나타났습니다.", "npc");
+// 플레이어 체력/몬스터 체력 업데이트
+function updateStats(){
+  document.getElementById("player-hp").innerText = `체력: ${player.hp} / ${player.maxHp}`;
+  const monsterBar = document.getElementById("monster-health-inner");
+  monsterBar.style.width = `${(monster.hp / monster.maxHp) * 100}%`;
+}
+
+// 전투 시작
+function startBattle(){
+  writeMessage("유령이 나타났습니다!", "npc");
+  updateStats();
   setChoices([
-    { text: "맞서 싸운다", action: () => {
-        writeMessage("유령과 싸워서 이겼습니다!", "player");
-        setChoices([{ text: "다음 진행", action: startGame }]);
-    }},
-    { text: "도망간다", action: () => {
-        writeMessage("도망쳤습니다.", "player");
-        setChoices([{ text: "다음 진행", action: startGame }]);
-    }}
+    { text: "공격", action: attack },
+    { text: "도망", action: flee }
   ]);
 }
 
+function attack(){
+  let damageToMonster = Math.max(player.attack - 20, 5); // 단순 데미지 계산
+  monster.hp -= damageToMonster;
+  writeMessage(`몬스터에게 ${damageToMonster}의 피해를 주었습니다!`, "player");
+  if(monster.hp <= 0){
+    monster.hp = 0;
+    updateStats();
+    writeMessage("몬스터를 처치했습니다!", "player");
+    setChoices([{ text: "다음 전투", action: resetBattle }]);
+  } else {
+    monsterTurn();
+  }
+  updateStats();
+}
+
+function monsterTurn(){
+  let damageToPlayer = 15; // 단순 고정 데미지
+  player.hp -= damageToPlayer;
+  if(player.hp < 0) player.hp = 0;
+  writeMessage(`몬스터가 공격! 플레이어가 ${damageToPlayer} 피해를 입었습니다.`, "npc");
+  updateStats();
+  if(player.hp <= 0){
+    writeMessage("플레이어가 쓰러졌습니다...", "npc");
+    setChoices([]);
+  } else {
+    setChoices([
+      { text: "공격", action: attack },
+      { text: "도망", action: flee }
+    ]);
+  }
+}
+
+function flee(){
+  writeMessage("도망쳤습니다!", "player");
+  setChoices([{ text: "다음 전투", action: resetBattle }]);
+}
+
+function resetBattle(){
+  monster.hp = monster.maxHp;
+  player.hp = player.maxHp;
+  updateStats();
+  startBattle();
+}
+
 // 게임 시작
-startGame();
+startBattle();
 </script>
 
 </body>
